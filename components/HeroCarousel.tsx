@@ -110,36 +110,17 @@ export function HeroCarousel({ onOpenBooking }: HeroCarouselProps) {
               />
               ========================================================================
             */}
-            <div className="relative w-full h-full bg-stone-300">
-              {/* Pattern texture overlay */}
-              <div
-                className="absolute inset-0 opacity-15"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(#0A192F 1.5px, transparent 1.5px), radial-gradient(#0A192F 1.5px, #d1cfc0 1.5px)",
-                  backgroundSize: "28px 28px",
-                  backgroundPosition: "0 0, 14px 14px",
-                }}
+            <div className="relative w-full h-full bg-[#0A192F] overflow-hidden">
+              {/* Actual Hero Image loaded from /public/hero1.jpg to /public/hero7.jpg */}
+              <img
+                src={`/${slides[currentIndex].fileName}`}
+                alt={slides[currentIndex].title}
+                className="w-full h-full object-cover object-center transition-transform duration-1000 scale-100"
+                loading={currentIndex === 0 ? "eager" : "lazy"}
               />
 
-              {/* Semantic Animated Gray Placeholder Structure */}
-              <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-stone-200 via-stone-300 to-stone-400">
-                <div className="max-w-md w-full p-4 rounded-xl border-2 border-dashed border-[#0A192F]/30 bg-white/40 backdrop-blur-sm text-center space-y-2">
-                  <div className="inline-block px-3 py-1 rounded-full bg-[#0A192F] text-[#D4AF37] text-xs font-bold uppercase tracking-wider">
-                    {/* Explicit filename reference */}
-                    Asset Target: /{slides[currentIndex].fileName}
-                  </div>
-                  <p className="text-xs text-[#0A192F]/80 font-medium">
-                    Slide {currentIndex + 1} of 7: {slides[currentIndex].title}
-                  </p>
-                  <p className="text-[11px] text-[#0A192F]/60">
-                    Replace with your photo: <code className="font-mono text-[#0A192F] bg-white/60 px-1 py-0.5 rounded">{slides[currentIndex].fileName}</code>
-                  </p>
-                </div>
-              </div>
-
               {/* Contrast Overlays for Text Legibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A192F]/90 via-[#0A192F]/55 to-[#0A192F]/40" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A192F]/90 via-[#0A192F]/55 to-[#0A192F]/35 pointer-events-none" />
             </div>
           </motion.div>
         </AnimatePresence>
