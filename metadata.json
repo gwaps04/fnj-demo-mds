@@ -1,0 +1,8 @@
+{
+  "name": "FnJ Working Space & Pickleball Club — MDS Demo",
+  "description": "FnJ Working Space and Pickleball Club in Tagas, Daraga, Albay. Coworking desk passes, conference rooms, pickleball court reservations, and amenities guide.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
