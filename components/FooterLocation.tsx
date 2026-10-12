@@ -31,21 +31,21 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
   };
 
   return (
-    <footer id="location" className="bg-[#0A192F] text-white border-t-4 border-[#D4AF37]">
+    <footer id="location" className="bg-[#0A192F] text-white">
       {/* Location Showcase Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
-        <div className="grid lg:grid-cols-12 gap-10 items-start">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+        <div className="grid lg:grid-cols-12 gap-12 items-start">
           {/* Left Column: Brand & Exact Address */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-[#112442] border-2 border-[#D4AF37] flex items-center justify-center font-black text-xl text-[#D4AF37] shadow-lg">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-[#112442] flex items-center justify-center font-black text-xl text-[#D4AF37] shadow-sm">
                 FNJ
               </div>
               <div>
                 <h3 className="text-xl font-black text-white tracking-tight uppercase">
                   FNJ Coworking Space
                 </h3>
-                <p className="text-xs text-[#D4AF37] font-semibold tracking-wide">
+                <p className="text-xs text-[#D4AF37] font-bold tracking-wide">
                   Rental & Productivity Hub • Daraga, Albay
                 </p>
               </div>
@@ -57,21 +57,21 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
               comfort, bottomless coffee, and Albay’s thrilling 3rd-floor indoor pickleball court.
             </p>
 
-            {/* Required Exact Address Card */}
-            <div className="p-5 rounded-2xl bg-[#112442] border border-[#D4AF37]/40 space-y-3">
+            {/* Required Exact Address Card (Borderless, Soft Padding) */}
+            <div className="p-6 rounded-3xl bg-[#112442] space-y-3 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-[#D4AF37] text-[#0A192F] shrink-0 mt-0.5">
+                  <div className="p-2.5 rounded-xl bg-[#D4AF37] text-[#0A192F] shrink-0 mt-0.5 shadow-sm">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-wider text-[#D4AF37] block">
                       Facility Address
                     </span>
-                    <p className="text-sm font-bold text-white leading-snug">
+                    <p className="text-sm font-bold text-white leading-snug mt-0.5">
                       {fullAddress}
                     </p>
-                    <p className="text-xs text-[#D4AF37] mt-1 font-medium">
+                    <p className="text-xs text-[#D4AF37] mt-1 font-semibold">
                       ★ Landmark: Beside Mayon Petroleum Gas Station
                     </p>
                   </div>
@@ -79,7 +79,7 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
 
                 <button
                   onClick={handleCopy}
-                  className="shrink-0 p-2 rounded-lg bg-[#0A192F] hover:bg-black text-stone-200 hover:text-white border border-[#D4AF37]/50 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="shrink-0 px-3 py-1.5 rounded-xl bg-[#0A192F] hover:bg-black text-stone-200 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
                   title="Copy full address"
                 >
                   {copied ? (
@@ -96,8 +96,8 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
                 </button>
               </div>
 
-              <div className="pt-2 border-t border-white/10 text-[11px] text-stone-300 flex items-center gap-1.5">
-                <Compass className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <div className="pt-3 border-t border-white/10 text-[11px] text-stone-300 flex items-center gap-2 font-normal">
+                <Compass className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
                 <span>3 mins from Daraga Public Market • 7 mins from Legazpi City Center</span>
               </div>
             </div>
@@ -109,7 +109,7 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
               <h4 className="text-sm font-black uppercase tracking-wider text-[#D4AF37] flex items-center gap-2">
                 <Clock className="w-4 h-4" /> Operating Hours
               </h4>
-              <div className="space-y-2 text-xs text-stone-300 bg-[#112442] p-4 rounded-xl border border-white/10">
+              <div className="space-y-2.5 text-xs text-stone-300 bg-[#112442] p-6 rounded-3xl shadow-sm">
                 <div className="flex justify-between py-1 border-b border-white/10">
                   <span className="text-stone-400">Monday – Saturday:</span>
                   <span className="font-bold text-white">8:00 AM – 10:00 PM</span>
@@ -126,29 +126,23 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
             </div>
 
             {/* Social Links (With required Facebook Icon Placeholder) */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <h4 className="text-sm font-black uppercase tracking-wider text-[#D4AF37]">
                 Connect With Us
               </h4>
-              <p className="text-xs text-stone-400">
+              <p className="text-xs text-stone-400 leading-relaxed font-normal">
                 Follow our community page for daily desk availability and pickleball court mixers:
               </p>
 
               <div className="flex items-center gap-3 pt-1">
-                {/* 
-                  ========================================================================
-                  [FACEBOOK SOCIAL LINK PLACEHOLDER]
-                  Swap href with your official page: e.g. https://facebook.com/fnjcoworking
-                  ========================================================================
-                */}
+                {/* Facebook Social Link */}
                 <a
                   href="https://facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white text-xs font-bold shadow-md transition-all group"
+                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-[#1877F2] hover:bg-[#166fe5] text-white text-xs font-black shadow-sm transition-all group"
                   aria-label="Visit FNJ on Facebook"
                 >
-                  {/* Facebook SVG Icon Placeholder */}
                   <svg
                     className="w-4 h-4 fill-current group-hover:scale-110 transition-transform"
                     viewBox="0 0 24 24"
@@ -162,12 +156,12 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
           </div>
 
           {/* Right Column: Final CTA "Book Today" */}
-          <div className="lg:col-span-3 rounded-2xl bg-gradient-to-b from-[#112442] to-[#0A192F] border-2 border-[#D4AF37] p-6 text-center space-y-4 shadow-xl">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] bg-[#0A192F] px-2.5 py-1 rounded-full border border-[#D4AF37]/50 inline-block">
+          <div className="lg:col-span-3 rounded-3xl bg-[#112442] p-8 text-center space-y-5 shadow-sm">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] bg-[#0A192F] px-3 py-1 rounded-full inline-block">
               Fast Online Reservation
             </span>
 
-            <h4 className="text-lg font-black text-white uppercase tracking-tight">
+            <h4 className="text-xl font-black text-white uppercase tracking-tight">
               Ready to Secure Your Spot?
             </h4>
 
@@ -175,10 +169,10 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
               Book hourly passes, private conference suites, or 3rd floor pickleball slots in seconds.
             </p>
 
-            {/* Required Final Navy Blue "Book Today" CTA Button */}
+            {/* Required Final Navy Blue "Book Today" CTA Button (Sleek Borderless) */}
             <button
               onClick={onOpenBooking}
-              className="w-full py-4 rounded-xl bg-[#0A192F] hover:bg-[#071324] text-white font-black text-xs sm:text-sm uppercase tracking-wider border-2 border-[#D4AF37] shadow-xl hover:shadow-[#D4AF37]/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+              className="w-full py-4 rounded-xl bg-[#0A192F] hover:bg-black text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-sm hover:scale-[1.01] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer group"
             >
               <span>Book Today</span>
               <ArrowRight className="w-4 h-4 text-[#D4AF37] group-hover:translate-x-1 transition-transform" />
@@ -191,8 +185,8 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
           </div>
         </div>
 
-        {/* Bottom Copyright & Design Standards */}
-        <div className="pt-8 mt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
+        {/* Bottom Copyright */}
+        <div className="pt-10 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
           <div>
             © {new Date().getFullYear()} FNJ Coworking Space Rental & Pickleball Club. All rights reserved.
           </div>
@@ -201,7 +195,7 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
               Tagas, Daraga, Albay, Philippines
             </span>
             <span>•</span>
-            <span>Vercel-Ready Next.js Mockup</span>
+            <span>Minimalist & Elegant Experience</span>
           </div>
         </div>
       </div>

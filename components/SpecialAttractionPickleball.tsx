@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Trophy, Sparkles, CheckCircle2, ArrowRight, Clock, Award } from "lucide-react";
+import { Trophy, CheckCircle2, ArrowRight, Clock } from "lucide-react";
 
 interface SpecialAttractionPickleballProps {
   onOpenBooking: () => void;
@@ -11,18 +11,18 @@ export function SpecialAttractionPickleball({
   onOpenBooking,
 }: SpecialAttractionPickleballProps) {
   return (
-    <section className="py-20 bg-stone-100 border-b-2 border-[#0A192F]/15 relative overflow-hidden">
-      {/* Decorative subtle background elements */}
+    <section className="py-24 sm:py-28 bg-[#F5F5DC] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-[#0A192F] text-white border-4 border-[#D4AF37] shadow-2xl p-6 sm:p-10 lg:p-12 relative overflow-hidden">
+        {/* Sleek Borderless Container with Soft Navy Shadow and Generous Breathing Room */}
+        <div className="rounded-3xl bg-[#0A192F] text-white shadow-[0_10px_30px_rgba(10,25,47,0.12)] p-8 sm:p-14 lg:p-16 relative overflow-hidden">
           {/* Subtle gold glow */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4AF37]/10 blur-[100px] pointer-events-none rounded-full" />
 
-          <div className="grid lg:grid-cols-12 gap-10 items-center relative z-10">
+          <div className="grid lg:grid-cols-12 gap-12 items-center relative z-10">
             {/* Left Content Column */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Highlight Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4AF37] text-[#0A192F] text-xs font-black uppercase tracking-wider shadow-md">
+            <div className="lg:col-span-7 space-y-7">
+              {/* Sleek Borderless Pill Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37] text-[#0A192F] text-xs font-black uppercase tracking-wider shadow-sm">
                 <Trophy className="w-4 h-4 fill-[#0A192F]" />
                 Special Attraction • 3rd Floor
               </div>
@@ -43,74 +43,74 @@ export function SpecialAttractionPickleball({
               </p>
 
               {/* Features List */}
-              <div className="grid sm:grid-cols-2 gap-3 pt-2 text-xs text-stone-200">
-                <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#112442] border border-white/10">
+              <div className="grid sm:grid-cols-2 gap-3.5 pt-1 text-xs text-stone-200">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-[#112442]">
                   <CheckCircle2 className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>Regulation indoor court (rain or shine)</span>
+                  <span className="font-medium">Regulation indoor court (rain or shine)</span>
                 </div>
-                <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#112442] border border-white/10">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-[#112442]">
                   <CheckCircle2 className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>Paddle & ball rentals on site</span>
+                  <span className="font-medium">Paddle & ball rentals on site</span>
                 </div>
-                <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#112442] border border-white/10">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-[#112442]">
                   <CheckCircle2 className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>Beginner clinics & weekly mixers</span>
+                  <span className="font-medium">Beginner clinics & weekly mixers</span>
                 </div>
-                <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#112442] border border-white/10">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-[#112442]">
                   <CheckCircle2 className="w-4 h-4 text-[#D4AF37] shrink-0" />
-                  <span>Shower & spectator viewing lounge</span>
+                  <span className="font-medium">Shower & spectator viewing lounge</span>
                 </div>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="pt-4 flex flex-wrap items-center gap-4">
+              {/* Sleek Borderless CTA Buttons */}
+              <div className="pt-3 flex flex-wrap items-center gap-4">
                 <button
                   onClick={onOpenBooking}
-                  className="px-8 py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#b8952b] text-[#0A192F] font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-8 py-4 rounded-xl bg-[#D4AF37] hover:bg-[#b8952b] text-[#0A192F] font-black text-xs sm:text-sm uppercase tracking-wider shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-98 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <span>Book Pickleball Slot</span>
                   <ArrowRight className="w-4 h-4 text-[#0A192F]" />
                 </button>
 
-                <div className="text-xs text-[#D4AF37] font-semibold flex items-center gap-1.5">
+                <div className="text-xs text-[#D4AF37] font-bold flex items-center gap-1.5">
                   <Clock className="w-4 h-4" />
                   <span>Court slots starting at ₱300/hour</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Large Action Shot Placeholder */}
+            {/* Right Column: Large Action Shot Placeholder (Borderless, Soft Shadow) */}
             <div className="lg:col-span-5">
               {/* 
                 ========================================================================
                 [IMAGE PLACEHOLDER: PICKLEBALL ACTION SHOT]
-                Swap the placeholder below with your local asset: e.g. /public/pickleball-action.jpg
+                Swap with your local asset: e.g. /public/pickleball-action.jpg
                 ========================================================================
               */}
-              <div className="relative rounded-2xl overflow-hidden border-2 border-[#D4AF37] shadow-2xl bg-stone-300 min-h-[320px] sm:min-h-[380px] flex flex-col items-center justify-center p-6 text-center group">
-                {/* Semantic Gray Animated Placeholder Pattern */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-stone-400 via-stone-300 to-stone-200 animate-pulse" />
+              <div className="relative rounded-3xl overflow-hidden shadow-md bg-stone-300 min-h-[340px] sm:min-h-[400px] flex flex-col items-center justify-center p-8 text-center group">
+                {/* Subtle animated pattern */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-stone-400 via-stone-300 to-stone-200" />
 
-                <div className="relative z-10 max-w-xs p-5 rounded-2xl bg-[#0A192F]/90 backdrop-blur-md border border-[#D4AF37] text-center space-y-3">
-                  <div className="w-14 h-14 rounded-full bg-[#D4AF37] text-[#0A192F] flex items-center justify-center mx-auto shadow-lg">
+                <div className="relative z-10 max-w-xs p-6 rounded-2xl bg-[#0A192F]/92 backdrop-blur-md text-center space-y-3 shadow-lg">
+                  <div className="w-14 h-14 rounded-2xl bg-[#D4AF37] text-[#0A192F] flex items-center justify-center mx-auto shadow-sm">
                     <Trophy className="w-7 h-7" />
                   </div>
                   <div>
                     <span className="text-[10px] uppercase font-black tracking-widest text-[#D4AF37] block">
                       Target Asset Location
                     </span>
-                    <h4 className="text-sm font-bold text-white">/public/pickleball-action.jpg</h4>
-                    <p className="text-[11px] text-stone-300 mt-1">
+                    <h4 className="text-sm font-black text-white mt-0.5">/public/pickleball-action.jpg</h4>
+                    <p className="text-[11px] text-stone-300 mt-1.5 leading-relaxed font-normal">
                       Action shot: Players rallying, dinking at the kitchen line, or smiling on the 3rd floor court.
                     </p>
                   </div>
-                  <span className="inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-black/40 text-stone-300">
+                  <span className="inline-block text-[10px] font-mono px-2.5 py-1 rounded bg-black/40 text-stone-300">
                     Aspect Ratio: 4:3 or 16:9
                   </span>
                 </div>
 
-                {/* Overlaid Badge */}
-                <div className="absolute top-4 right-4 z-20 px-3 py-1 rounded-full bg-[#0A192F] border border-[#D4AF37] text-[#D4AF37] text-[11px] font-black uppercase tracking-wider">
+                {/* Overlaid Pill Badge */}
+                <div className="absolute top-4 right-4 z-20 px-3.5 py-1 rounded-full bg-[#0A192F] text-[#D4AF37] text-[10px] font-black uppercase tracking-wider shadow-sm">
                   Level 3 Court
                 </div>
               </div>

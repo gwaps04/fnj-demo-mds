@@ -9,7 +9,6 @@ import {
   Users,
   Sparkles,
   ArrowRight,
-  ShieldCheck,
   Star,
 } from "lucide-react";
 
@@ -62,33 +61,33 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
   ];
 
   return (
-    <section id="pricing" className="py-20 bg-[#F5F5DC] border-b-2 border-[#0A192F]/15">
+    <section id="pricing" className="py-24 sm:py-28 bg-[#F5F5DC]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0A192F] text-[#D4AF37] text-xs font-bold uppercase tracking-wider">
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0A192F] text-[#D4AF37] text-xs font-bold uppercase tracking-wider shadow-sm">
             <Sparkles className="w-3.5 h-3.5" />
             Transparent Pricing
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#0A192F] tracking-tight uppercase">
             Rental Rates & Passes
           </h2>
-          <div className="w-24 h-1.5 bg-[#D4AF37] mx-auto rounded-full" />
-          <p className="text-sm sm:text-base text-[#0A192F]/80 leading-relaxed font-medium">
+          <div className="w-20 h-1 bg-[#D4AF37] mx-auto rounded-full" />
+          <p className="text-sm sm:text-base text-[#0A192F]/80 leading-relaxed font-medium pt-2">
             Affordable hourly rates, student discounts, executive meeting rooms,
             and dedicated monthly memberships with zero hidden charges.
           </p>
         </div>
 
-        {/* Student vs Regular Rate Switcher */}
-        <div className="flex justify-center mb-10">
-          <div className="inline-flex p-1.5 rounded-2xl bg-[#0A192F] border-2 border-[#D4AF37] shadow-xl">
+        {/* Refined Borderless Pill Switcher */}
+        <div className="flex justify-center mb-14">
+          <div className="inline-flex p-1.5 rounded-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
             <button
               onClick={() => setActiveTab("regular")}
-              className={`px-6 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-7 py-3 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "regular"
-                  ? "bg-[#D4AF37] text-[#0A192F] shadow-md"
-                  : "text-stone-300 hover:text-white"
+                  ? "bg-[#0A192F] text-[#D4AF37] shadow-sm"
+                  : "text-[#0A192F]/70 hover:text-[#0A192F]"
               }`}
             >
               <Briefcase className="w-4 h-4" />
@@ -97,20 +96,20 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
 
             <button
               onClick={() => setActiveTab("student")}
-              className={`px-6 py-2.5 rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-7 py-3 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === "student"
-                  ? "bg-[#D4AF37] text-[#0A192F] shadow-md"
-                  : "text-stone-300 hover:text-white"
+                  ? "bg-[#0A192F] text-[#D4AF37] shadow-sm"
+                  : "text-[#0A192F]/70 hover:text-[#0A192F]"
               }`}
             >
               <GraduationCap className="w-4 h-4" />
-              <span>Student Rates (With Valid ID)</span>
+              <span>Student Rates (With ID)</span>
             </button>
           </div>
         </div>
 
-        {/* 4 Hourly Rates Cards Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        {/* 4 Hourly Rates Cards: Pure White, Soft Shadow, Generous Padding p-8 to p-10, No Borders */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {rateTiers.map((tier, idx) => {
             const price = activeTab === "student" ? tier.studentPrice : tier.regularPrice;
             const isFeatured = idx === 3; // 8 Hours
@@ -118,74 +117,72 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
             return (
               <div
                 key={idx}
-                className={`rounded-2xl p-6 bg-white border-2 border-[#0A192F] shadow-lg hover:shadow-xl transition-all flex flex-col justify-between relative ${
-                  isFeatured ? "ring-4 ring-[#D4AF37]" : ""
-                }`}
+                className="rounded-3xl p-8 sm:p-10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative"
               >
                 {isFeatured && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#0A192F] text-[#D4AF37] text-[10px] font-black uppercase tracking-wider border border-[#D4AF37]">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#0A192F] text-[#D4AF37] text-[10px] font-black uppercase tracking-wider shadow-sm whitespace-nowrap">
                     Most Popular Day Pass
                   </div>
                 )}
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded bg-[#F5F5DC] text-[#0A192F] border border-[#0A192F]/20 uppercase">
+                    <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#0A192F] text-[#D4AF37]">
                       {tier.badge}
                     </span>
                     <Clock className="w-4 h-4 text-[#D4AF37]" />
                   </div>
 
-                  <div>
+                  <div className="space-y-1">
                     <h3 className="text-xl font-black text-[#0A192F] tracking-tight">
                       {tier.hours}
                     </h3>
-                    <p className="text-xs text-[#0A192F]/70 font-medium">{tier.duration}</p>
+                    <p className="text-xs text-[#0A192F]/60 font-semibold">{tier.duration}</p>
                   </div>
 
                   {/* Pricing Display */}
-                  <div className="py-3 border-y border-[#0A192F]/15">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-[#0A192F]">{price}</span>
-                      <span className="text-xs font-semibold text-[#0A192F]/70">
+                  <div className="py-4 border-y border-stone-100">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-4xl font-black text-[#0A192F] tracking-tight">{price}</span>
+                      <span className="text-xs font-semibold text-[#0A192F]/60">
                         {activeTab === "student" ? "/ student pass" : "/ standard pass"}
                       </span>
                     </div>
-                    <div className="text-[11px] text-[#0A192F]/60 mt-1">
+                    <div className="text-[11px] text-[#0A192F]/50 mt-1">
                       {activeTab === "student"
                         ? `Standard rate: ${tier.regularPrice}`
                         : `Student rate: ${tier.studentPrice} with ID`}
                     </div>
                   </div>
 
-                  <p className="text-xs text-[#0A192F]/80 leading-relaxed font-normal min-h-[36px]">
+                  <p className="text-xs text-[#0A192F]/70 leading-relaxed font-normal min-h-[36px]">
                     {tier.description}
                   </p>
 
-                  <ul className="space-y-2 text-xs text-[#0A192F] pt-2">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                  <ul className="space-y-2.5 text-xs text-[#0A192F] pt-2">
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                       <span>High-speed fiber Wi-Fi</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                       <span>Dedicated power outlet</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                       <span>Airconditioned comfort</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                       <span>Full generator backup</span>
                     </li>
                   </ul>
                 </div>
 
-                <div className="pt-6 mt-4 border-t border-[#0A192F]/10">
+                <div className="pt-8 mt-6 border-t border-stone-100">
                   <button
                     onClick={onOpenBooking}
-                    className="w-full py-2.5 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-extrabold text-xs uppercase tracking-wider border border-[#D4AF37] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-black text-xs uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Book Now</span>
                     <ArrowRight className="w-3.5 h-3.5 text-[#D4AF37]" />
@@ -196,39 +193,39 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
           })}
         </div>
 
-        {/* Side-by-Side Comparison Summary Table */}
-        <div className="mb-16 overflow-hidden rounded-2xl bg-white border-2 border-[#0A192F] shadow-xl">
-          <div className="bg-[#0A192F] px-6 py-4 flex items-center justify-between">
+        {/* Side-by-Side Comparison Summary Table: Pure White, Soft Shadow, Borderless */}
+        <div className="mb-20 overflow-hidden rounded-3xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+          <div className="bg-[#0A192F] px-8 py-5 flex items-center justify-between">
             <h4 className="text-sm sm:text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
               <span className="text-[#D4AF37]">★</span> Hourly Rate Comparison Table
             </h4>
-            <span className="text-xs text-[#D4AF37] font-semibold">Albay Best Value</span>
+            <span className="text-xs text-[#D4AF37] font-bold">Albay Best Value</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-[#F5F5DC] border-b border-[#0A192F]/20 text-[#0A192F] font-bold">
+              <thead className="bg-[#F5F5DC]/60 text-[#0A192F] font-bold">
                 <tr>
-                  <th className="py-3 px-4 sm:px-6">Duration Tier</th>
-                  <th className="py-3 px-4 sm:px-6">Student Rate (With ID)</th>
-                  <th className="py-3 px-4 sm:px-6">Regular Rate</th>
-                  <th className="py-3 px-4 sm:px-6">Included Amenities</th>
-                  <th className="py-3 px-4 sm:px-6 text-right">Action</th>
+                  <th className="py-4 px-6 sm:px-8">Duration Tier</th>
+                  <th className="py-4 px-6 sm:px-8">Student Rate (With ID)</th>
+                  <th className="py-4 px-6 sm:px-8">Regular Rate</th>
+                  <th className="py-4 px-6 sm:px-8">Included Amenities</th>
+                  <th className="py-4 px-6 sm:px-8 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#0A192F]/10 text-[#0A192F]">
+              <tbody className="divide-y divide-stone-100 text-[#0A192F]">
                 {rateTiers.map((r, i) => (
-                  <tr key={i} className="hover:bg-stone-50 transition-colors">
-                    <td className="py-3 px-4 sm:px-6 font-bold">{r.hours}</td>
-                    <td className="py-3 px-4 sm:px-6 font-black text-[#0A192F]">{r.studentPrice}</td>
-                    <td className="py-3 px-4 sm:px-6 font-black text-[#0A192F]">{r.regularPrice}</td>
-                    <td className="py-3 px-4 sm:px-6 text-xs text-[#0A192F]/70">
+                  <tr key={i} className="hover:bg-stone-50/70 transition-colors">
+                    <td className="py-4 px-6 sm:px-8 font-black">{r.hours}</td>
+                    <td className="py-4 px-6 sm:px-8 font-black text-[#0A192F]">{r.studentPrice}</td>
+                    <td className="py-4 px-6 sm:px-8 font-black text-[#0A192F]">{r.regularPrice}</td>
+                    <td className="py-4 px-6 sm:px-8 text-xs text-[#0A192F]/70 font-normal">
                       Fiber Wi-Fi, Outlets, AC, Generator, Brewed Coffee
                     </td>
-                    <td className="py-3 px-4 sm:px-6 text-right">
+                    <td className="py-4 px-6 sm:px-8 text-right">
                       <button
                         onClick={onOpenBooking}
-                        className="px-3.5 py-1.5 rounded-lg bg-[#0A192F] text-white text-xs font-bold hover:bg-[#112442] border border-[#D4AF37] transition-all cursor-pointer"
+                        className="px-4 py-2 rounded-lg bg-[#0A192F] text-[#D4AF37] text-xs font-black uppercase hover:bg-[#112442] transition-all cursor-pointer shadow-sm"
                       >
                         Book Now
                       </button>
@@ -240,13 +237,13 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
           </div>
         </div>
 
-        {/* Two Featured Offer Cards: Conference Room + Highlighted 1 Month Subscription */}
+        {/* Featured Offer Cards: Pure White Conference Room + Solid Navy 1 Month Subscription (Both Borderless) */}
         <div className="grid md:grid-cols-12 gap-8">
-          {/* Required Conference Room Details: 1 TO 10 PAX, ₱700.00 PER HOUR */}
-          <div className="md:col-span-6 rounded-2xl bg-white border-2 border-[#0A192F] p-7 shadow-xl flex flex-col justify-between">
-            <div className="space-y-4">
+          {/* Conference Room Details: 1 TO 10 PAX, ₱700.00 PER HOUR (Pure White Card, p-8 to p-10, Soft Shadow) */}
+          <div className="md:col-span-6 rounded-3xl bg-white p-8 sm:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex flex-col justify-between">
+            <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-md bg-[#0A192F] text-[#D4AF37]">
+                <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#0A192F] text-[#D4AF37]">
                   Private Meeting Facility
                 </span>
                 <Users className="w-5 h-5 text-[#D4AF37]" />
@@ -256,48 +253,48 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
                 <h3 className="text-2xl font-black text-[#0A192F] tracking-tight">
                   Conference Room Rental
                 </h3>
-                <p className="text-xs text-[#0A192F]/70 font-semibold uppercase tracking-wider mt-1">
+                <p className="text-xs text-[#0A192F]/60 font-semibold uppercase tracking-wider mt-1">
                   Capacity: 1 TO 10 PAX
                 </p>
               </div>
 
               {/* Price Banner */}
-              <div className="p-4 rounded-xl bg-[#F5F5DC] border border-[#0A192F]/20">
+              <div className="p-6 rounded-2xl bg-[#F5F5DC]">
                 <div className="text-3xl sm:text-4xl font-black text-[#0A192F]">
                   ₱700.00
                   <span className="text-xs font-bold text-[#0A192F]/70 uppercase ml-2">
                     PER HOUR
                   </span>
                 </div>
-                <p className="text-[11px] text-[#0A192F]/70 mt-1">
+                <p className="text-[11px] text-[#0A192F]/70 mt-1 font-normal">
                   Ideal for board meetings, client presentations, team scrums, and thesis defenses.
                 </p>
               </div>
 
-              <ul className="space-y-2 text-xs text-[#0A192F] font-medium pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+              <ul className="space-y-2.5 text-xs text-[#0A192F] font-medium pt-1">
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Seating capacity: 1 TO 10 PAX comfortably</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>55” 4K Smart Presentation Display with HDMI & Wireless Casting</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Glass whiteboard with dry-erase markers</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Dedicated power strips & sound-isolated acoustic environment</span>
                 </li>
               </ul>
             </div>
 
-            <div className="pt-6 mt-6 border-t border-[#0A192F]/10">
+            <div className="pt-8 mt-6 border-t border-stone-100">
               <button
                 onClick={onOpenBooking}
-                className="w-full py-3.5 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-extrabold text-xs uppercase tracking-wider border-2 border-[#D4AF37] shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-black text-xs uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Book Conference Room</span>
                 <ArrowRight className="w-4 h-4 text-[#D4AF37]" />
@@ -305,67 +302,70 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
             </div>
           </div>
 
-          {/* Required Highlighted Subscription: 1 MONTH SUBSCRIPTION for ₱9,000.00 */}
-          <div className="md:col-span-6 rounded-2xl bg-[#0A192F] text-white border-4 border-[#D4AF37] p-7 shadow-2xl flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-[#D4AF37] text-[#0A192F] px-4 py-1 text-[11px] font-black uppercase tracking-wider rounded-bl-xl shadow-md flex items-center gap-1">
-              <Star className="w-3.5 h-3.5 fill-[#0A192F]" />
-              Highlighted Subscription
-            </div>
+          {/* Highlighted Subscription: 1 MONTH SUBSCRIPTION for ₱9,000.00 (Solid Navy Blue, Borderless, Soft Shadow) */}
+          <div className="md:col-span-6 rounded-3xl bg-[#0A192F] text-white p-8 sm:p-10 shadow-[0_10px_30px_rgba(10,25,47,0.12)] flex flex-col justify-between relative">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#D4AF37] text-[#0A192F] shadow-sm flex items-center gap-1.5">
+                  <Star className="w-3 h-3 fill-[#0A192F]" />
+                  Highlighted Subscription
+                </span>
+                <span className="text-xs text-stone-300 font-semibold">Priority Resident</span>
+              </div>
 
-            <div className="space-y-4 pt-2">
               <div>
                 <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] block">
                   All-Inclusive Long Term Pass
                 </span>
-                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
                   1 MONTH SUBSCRIPTION
                 </h3>
-                <p className="text-xs text-stone-300 mt-1">
+                <p className="text-xs text-stone-300 mt-1 font-normal">
                   Your dedicated home base for unstoppable productivity in Albay.
                 </p>
               </div>
 
               {/* Exact Price: ₱9,000.00 */}
-              <div className="p-4 rounded-xl bg-[#112442] border border-[#D4AF37]/40">
+              <div className="p-6 rounded-2xl bg-[#112442]">
                 <div className="text-3xl sm:text-4xl font-black text-[#D4AF37]">
                   ₱9,000.00
                   <span className="text-xs font-bold text-stone-300 uppercase ml-2">
                     / 30 DAYS
                   </span>
                 </div>
-                <p className="text-[11px] text-stone-300 mt-1">
+                <p className="text-[11px] text-stone-300 mt-1 font-normal">
                   Enjoy unlimited facility usage, reserved locker, and priority perks every day.
                 </p>
               </div>
 
-              <ul className="space-y-2 text-xs text-stone-200 font-medium pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+              <ul className="space-y-2.5 text-xs text-stone-200 font-medium pt-1">
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Dedicated workstation with ergonomic task chair</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Unlimited monthly coworking access (Mon - Sun)</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>5 Free Hours Conference Room credits included</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Free personal secure locking storage locker</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#D4AF37]" />
+                <li className="flex items-center gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Exclusive 15% discount on 3rd Floor FNJ Pickleball bookings</span>
                 </li>
               </ul>
             </div>
 
-            <div className="pt-6 mt-6 border-t border-white/10">
+            <div className="pt-8 mt-6 border-t border-white/10">
               <button
                 onClick={onOpenBooking}
-                className="w-full py-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#b8952b] text-[#0A192F] font-black text-xs uppercase tracking-wider shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 rounded-xl bg-[#D4AF37] hover:bg-[#b8952b] text-[#0A192F] font-black text-xs uppercase tracking-wider shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Subscribe for ₱9,000.00</span>
                 <ArrowRight className="w-4 h-4 text-[#0A192F]" />

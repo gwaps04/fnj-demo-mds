@@ -13,10 +13,7 @@ import {
   Trophy,
   Users,
   Sparkles,
-  Zap,
   ArrowRight,
-  GraduationCap,
-  Briefcase,
   Star,
 } from "lucide-react";
 
@@ -43,7 +40,6 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [notes, setNotes] = useState("");
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [confirmationCode, setConfirmationCode] = useState("");
@@ -103,42 +99,42 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-[#0A192F]/80 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-[#0A192F]/70 backdrop-blur-sm transition-opacity"
       />
 
-      {/* Modal Dialog Card */}
-      <div className="relative w-full max-w-xl rounded-3xl bg-[#F5F5DC] border-4 border-[#0A192F] shadow-2xl p-6 sm:p-8 text-left z-10 my-8 max-h-[92vh] overflow-y-auto text-[#0A192F]">
+      {/* Modal Dialog Card: Pure White, Soft High-Elevation Shadow, Borderless */}
+      <div className="relative w-full max-w-xl rounded-3xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] p-8 sm:p-10 text-left z-10 my-8 max-h-[92vh] overflow-y-auto text-[#0A192F]">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl text-[#0A192F] hover:bg-[#0A192F]/10 transition-colors"
+          className="absolute top-6 right-6 p-2 rounded-xl text-[#0A192F]/60 hover:text-[#0A192F] hover:bg-stone-100 transition-colors"
           aria-label="Close dialog"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5" />
         </button>
 
         {!isSubmitted ? (
           <div>
-            <div className="space-y-1 pb-4 border-b-2 border-[#0A192F]/20">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0A192F] text-[#D4AF37] text-xs font-bold uppercase tracking-wider">
+            <div className="space-y-1.5 pb-5 border-b border-stone-100">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0A192F] text-[#D4AF37] text-xs font-black uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" /> FNJ Reservation Portal
               </div>
               <h3 className="text-2xl font-black text-[#0A192F] uppercase tracking-tight">
                 Book Your Space
               </h3>
-              <p className="text-xs text-[#0A192F]/80 font-medium">
+              <p className="text-xs text-[#0A192F]/70 font-normal">
                 2nd Floor Biak Realty Corp., Lakandula Drive, Tagas, Daraga, Albay
               </p>
             </div>
 
-            {/* Service Category Buttons */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 my-5 p-1.5 rounded-2xl bg-[#0A192F] border-2 border-[#D4AF37]">
+            {/* Service Category Buttons (Borderless, Soft) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 my-6 p-1.5 rounded-2xl bg-[#0A192F]">
               <button
                 type="button"
                 onClick={() => setCategory("coworking")}
-                className={`py-2 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                className={`py-2.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
                   category === "coworking"
-                    ? "bg-[#D4AF37] text-[#0A192F] shadow-md"
+                    ? "bg-[#D4AF37] text-[#0A192F] shadow-sm"
                     : "text-stone-300 hover:text-white"
                 }`}
               >
@@ -149,9 +145,9 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
               <button
                 type="button"
                 onClick={() => setCategory("conference")}
-                className={`py-2 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                className={`py-2.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
                   category === "conference"
-                    ? "bg-[#D4AF37] text-[#0A192F] shadow-md"
+                    ? "bg-[#D4AF37] text-[#0A192F] shadow-sm"
                     : "text-stone-300 hover:text-white"
                 }`}
               >
@@ -162,9 +158,9 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
               <button
                 type="button"
                 onClick={() => setCategory("subscription")}
-                className={`py-2 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                className={`py-2.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
                   category === "subscription"
-                    ? "bg-[#D4AF37] text-[#0A192F] shadow-md"
+                    ? "bg-[#D4AF37] text-[#0A192F] shadow-sm"
                     : "text-stone-300 hover:text-white"
                 }`}
               >
@@ -175,9 +171,9 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
               <button
                 type="button"
                 onClick={() => setCategory("pickleball")}
-                className={`py-2 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                className={`py-2.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
                   category === "pickleball"
-                    ? "bg-[#D4AF37] text-[#0A192F] shadow-md"
+                    ? "bg-[#D4AF37] text-[#0A192F] shadow-sm"
                     : "text-stone-300 hover:text-white"
                 }`}
               >
@@ -187,21 +183,21 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
             </div>
 
             <form onSubmit={handleBookingSubmit} className="space-y-4 text-xs">
-              {/* Category: Coworking (Hourly Tiers + Student vs Regular) */}
+              {/* Category: Coworking */}
               {category === "coworking" && (
-                <div className="space-y-3 p-3.5 rounded-2xl bg-white border-2 border-[#0A192F]">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#0A192F]/15">
-                    <span className="font-extrabold uppercase text-[11px] text-[#0A192F]">
+                <div className="space-y-3.5 p-5 rounded-2xl bg-[#F5F5DC]/60">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#0A192F]/10">
+                    <span className="font-black uppercase text-[11px] text-[#0A192F]">
                       Rate Category
                     </span>
-                    <div className="inline-flex rounded-lg bg-[#F5F5DC] p-1 border border-[#0A192F]/30">
+                    <div className="inline-flex rounded-full bg-white p-1 shadow-sm">
                       <button
                         type="button"
                         onClick={() => setRateType("regular")}
-                        className={`px-3 py-1 rounded-md text-[11px] font-black uppercase transition-all ${
+                        className={`px-3.5 py-1 rounded-full text-[11px] font-black uppercase transition-all ${
                           rateType === "regular"
-                            ? "bg-[#0A192F] text-white"
-                            : "text-[#0A192F]"
+                            ? "bg-[#0A192F] text-[#D4AF37]"
+                            : "text-[#0A192F]/70"
                         }`}
                       >
                         Regular
@@ -209,10 +205,10 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       <button
                         type="button"
                         onClick={() => setRateType("student")}
-                        className={`px-3 py-1 rounded-md text-[11px] font-black uppercase transition-all ${
+                        className={`px-3.5 py-1 rounded-full text-[11px] font-black uppercase transition-all ${
                           rateType === "student"
-                            ? "bg-[#0A192F] text-white"
-                            : "text-[#0A192F]"
+                            ? "bg-[#0A192F] text-[#D4AF37]"
+                            : "text-[#0A192F]/70"
                         }`}
                       >
                         Student (With ID)
@@ -220,8 +216,8 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="font-extrabold uppercase text-[11px] text-[#0A192F]">
+                  <div className="space-y-2">
+                    <label className="font-black uppercase text-[11px] text-[#0A192F]">
                       Select Duration Tier
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -235,10 +231,10 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                           key={tier.id}
                           type="button"
                           onClick={() => setSelectedHourlyTier(tier.id as any)}
-                          className={`p-2.5 rounded-xl border-2 text-center transition-all cursor-pointer ${
+                          className={`p-3 rounded-xl text-center transition-all cursor-pointer ${
                             selectedHourlyTier === tier.id
-                              ? "bg-[#0A192F] text-white border-[#D4AF37] font-black shadow-md"
-                              : "bg-[#F5F5DC] border-[#0A192F]/30 text-[#0A192F] font-bold"
+                              ? "bg-[#0A192F] text-white font-black shadow-sm"
+                              : "bg-white text-[#0A192F] font-bold shadow-sm"
                           }`}
                         >
                           <div className="text-xs uppercase">{tier.label}</div>
@@ -252,9 +248,9 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 </div>
               )}
 
-              {/* Category: Conference Room (₱700.00 / hr) */}
+              {/* Category: Conference Room */}
               {category === "conference" && (
-                <div className="p-4 rounded-2xl bg-white border-2 border-[#0A192F] space-y-3">
+                <div className="p-5 rounded-2xl bg-[#F5F5DC]/60 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-black text-sm text-[#0A192F] uppercase">
@@ -264,12 +260,12 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                         1 TO 10 PAX • ₱700.00 PER HOUR
                       </p>
                     </div>
-                    <span className="text-lg font-black text-[#0A192F] bg-[#F5F5DC] px-3 py-1 rounded-xl border border-[#0A192F]/20">
+                    <span className="text-lg font-black text-[#0A192F] bg-white px-3.5 py-1.5 rounded-xl shadow-sm">
                       ₱700 / hr
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-[#0A192F]/15">
+                  <div className="flex items-center justify-between pt-2 border-t border-[#0A192F]/10">
                     <span className="font-bold">Select Hours:</span>
                     <div className="flex items-center gap-2">
                       {[1, 2, 3, 4, 8].map((h) => (
@@ -277,10 +273,10 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                           key={h}
                           type="button"
                           onClick={() => setConferenceHours(h)}
-                          className={`px-3 py-1 rounded-lg border-2 text-xs font-black ${
+                          className={`px-3 py-1.5 rounded-lg text-xs font-black shadow-sm ${
                             conferenceHours === h
-                              ? "bg-[#0A192F] text-white border-[#D4AF37]"
-                              : "bg-[#F5F5DC] border-[#0A192F]/30 text-[#0A192F]"
+                              ? "bg-[#0A192F] text-white"
+                              : "bg-white text-[#0A192F]"
                           }`}
                         >
                           {h} hr{h > 1 ? "s" : ""}
@@ -291,11 +287,11 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 </div>
               )}
 
-              {/* Category: 1 Month Subscription (₱9,000.00) */}
+              {/* Category: 1 Month Subscription */}
               {category === "subscription" && (
-                <div className="p-4 rounded-2xl bg-[#0A192F] text-white border-2 border-[#D4AF37] space-y-2">
+                <div className="p-5 rounded-2xl bg-[#0A192F] text-white space-y-2 shadow-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#D4AF37] text-[#0A192F]">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#D4AF37] text-[#0A192F]">
                       Highlighted Monthly Pass
                     </span>
                     <span className="text-lg font-black text-[#D4AF37]">₱9,000.00</span>
@@ -310,55 +306,53 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 </div>
               )}
 
-              {/* Category: Pickleball 3F (₱300 day / ₱400 night) */}
+              {/* Category: Pickleball 3F */}
               {category === "pickleball" && (
-                <div className="p-4 rounded-2xl bg-white border-2 border-[#0A192F] space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-black text-sm text-[#0A192F] uppercase">
-                        3rd Floor Pickleball Indoor Court
-                      </h4>
-                      <p className="text-[11px] text-[#0A192F]/70">
-                        Day (8AM-5PM): ₱300/hr • Night (5PM-10PM): ₱400/hr
-                      </p>
-                    </div>
+                <div className="p-5 rounded-2xl bg-[#F5F5DC]/60 space-y-3">
+                  <div>
+                    <h4 className="font-black text-sm text-[#0A192F] uppercase">
+                      3rd Floor Pickleball Indoor Court
+                    </h4>
+                    <p className="text-[11px] text-[#0A192F]/70">
+                      Day (8AM-5PM): ₱300/hr • Night (5PM-10PM): ₱400/hr
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setPickleballSlot("day")}
-                      className={`p-2.5 rounded-xl border-2 text-center font-black ${
+                      className={`p-3 rounded-xl text-center font-black shadow-sm ${
                         pickleballSlot === "day"
-                          ? "bg-[#0A192F] text-white border-[#D4AF37]"
-                          : "bg-[#F5F5DC] border-[#0A192F]/30 text-[#0A192F]"
+                          ? "bg-[#0A192F] text-white"
+                          : "bg-white text-[#0A192F]"
                       }`}
                     >
                       <div>Day Slot (₱300/hr)</div>
-                      <div className="text-[10px] font-normal">8:00 AM – 5:00 PM</div>
+                      <div className="text-[10px] font-normal text-stone-400">8:00 AM – 5:00 PM</div>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setPickleballSlot("night")}
-                      className={`p-2.5 rounded-xl border-2 text-center font-black ${
+                      className={`p-3 rounded-xl text-center font-black shadow-sm ${
                         pickleballSlot === "night"
-                          ? "bg-[#0A192F] text-white border-[#D4AF37]"
-                          : "bg-[#F5F5DC] border-[#0A192F]/30 text-[#0A192F]"
+                          ? "bg-[#0A192F] text-white"
+                          : "bg-white text-[#0A192F]"
                       }`}
                     >
                       <div>Night Floodlights (₱400/hr)</div>
-                      <div className="text-[10px] font-normal">5:00 PM – 10:00 PM</div>
+                      <div className="text-[10px] font-normal text-stone-400">5:00 PM – 10:00 PM</div>
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-[#0A192F]/15">
+                  <div className="flex items-center justify-between pt-2 border-t border-[#0A192F]/10">
                     <span className="font-bold">Paddle Rental (+₱50 each):</span>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setPaddleRentalCount(Math.max(0, paddleRentalCount - 1))}
-                        className="w-7 h-7 rounded bg-[#0A192F] text-white font-bold"
+                        className="w-8 h-8 rounded-lg bg-[#0A192F] text-white font-bold"
                       >
                         -
                       </button>
@@ -366,7 +360,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       <button
                         type="button"
                         onClick={() => setPaddleRentalCount(Math.min(4, paddleRentalCount + 1))}
-                        className="w-7 h-7 rounded bg-[#0A192F] text-white font-bold"
+                        className="w-8 h-8 rounded-lg bg-[#0A192F] text-white font-bold"
                       >
                         +
                       </button>
@@ -386,7 +380,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     required
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#0A192F] text-[#0A192F] font-semibold focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-[#0A192F] font-semibold focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   />
                 </div>
 
@@ -397,7 +391,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   <select
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#0A192F] text-[#0A192F] font-semibold focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-[#0A192F] font-semibold focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   >
                     <option value="08:00 AM">08:00 AM</option>
                     <option value="09:00 AM">09:00 AM</option>
@@ -423,7 +417,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     placeholder="e.g. Maria Santos"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#0A192F] text-[#0A192F] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-[#0A192F] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   />
                 </div>
 
@@ -438,7 +432,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       placeholder="maria@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#0A192F] text-[#0A192F] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-[#0A192F] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                     />
                   </div>
 
@@ -452,31 +446,31 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       placeholder="0917 123 4567"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#0A192F] text-[#0A192F] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-[#0A192F] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Live Cost Calculation Bar */}
-              <div className="p-4 rounded-2xl bg-[#0A192F] text-white border-2 border-[#D4AF37] space-y-1 shadow-md">
+              <div className="p-5 rounded-2xl bg-[#0A192F] text-white space-y-1.5 shadow-sm">
                 <div className="flex justify-between items-center text-xs text-stone-300">
                   <span>Selected Service:</span>
                   <span className="font-bold text-[#D4AF37]">{serviceDescription}</span>
                 </div>
-                <div className="flex justify-between items-center pt-2 border-t border-white/20">
+                <div className="flex justify-between items-center pt-2 border-t border-white/10">
                   <span className="font-extrabold uppercase text-xs">Total Amount to Pay:</span>
                   <span className="text-2xl font-black text-[#D4AF37]">₱{totalPrice.toLocaleString()}</span>
                 </div>
-                <p className="text-[11px] text-stone-300 pt-1">
+                <p className="text-[11px] text-stone-300 pt-1 font-normal">
                   Pay in cash, GCash, or Maya upon arrival at the 2nd floor reception desk.
                 </p>
               </div>
 
-              {/* Navy Blue Primary Submit CTA Button with Gold Accent */}
+              {/* Navy Blue Primary Submit CTA Button (Sleek Borderless) */}
               <button
                 type="submit"
-                className="w-full py-4 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-black text-sm uppercase tracking-wider border-2 border-[#D4AF37] shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-black text-sm uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Confirm Reservation</span>
                 <ArrowRight className="w-4 h-4 text-[#D4AF37]" />
@@ -486,25 +480,25 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
         ) : (
           /* Confirmation Screen */
           <div className="text-center space-y-6 py-4">
-            <div className="w-16 h-16 rounded-full bg-[#0A192F] text-[#D4AF37] border-2 border-[#D4AF37] flex items-center justify-center mx-auto shadow-xl">
+            <div className="w-16 h-16 rounded-2xl bg-[#0A192F] text-[#D4AF37] flex items-center justify-center mx-auto shadow-sm">
               <CheckCircle className="w-9 h-9" />
             </div>
 
             <div className="space-y-1">
-              <span className="text-xs font-black uppercase tracking-wider text-[#D4AF37] bg-[#0A192F] px-3 py-1 rounded-full inline-block">
+              <span className="text-xs font-black uppercase tracking-wider text-[#D4AF37] bg-[#0A192F] px-3.5 py-1 rounded-full inline-block">
                 Booking Confirmed
               </span>
               <h3 className="text-2xl font-black text-[#0A192F] uppercase">
                 We’re Ready For You!
               </h3>
-              <p className="text-xs text-[#0A192F]/80">
+              <p className="text-xs text-[#0A192F]/70">
                 Please present this voucher code upon arriving at FNJ Daraga.
               </p>
             </div>
 
             {/* Voucher Card */}
-            <div className="p-6 rounded-2xl bg-white border-2 border-dashed border-[#0A192F] text-left space-y-3 shadow-md">
-              <div className="flex justify-between items-center pb-2 border-b border-[#0A192F]/15">
+            <div className="p-6 rounded-2xl bg-[#F5F5DC]/70 text-left space-y-3.5 shadow-sm">
+              <div className="flex justify-between items-center pb-3 border-b border-[#0A192F]/10">
                 <div>
                   <span className="text-[10px] text-[#0A192F]/60 uppercase font-black">
                     Booking Reference
@@ -517,7 +511,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   <span className="text-[10px] text-[#0A192F]/60 uppercase font-black">
                     Status
                   </span>
-                  <div className="text-xs font-black text-[#D4AF37] bg-[#0A192F] px-2 py-0.5 rounded">
+                  <div className="text-xs font-black text-[#D4AF37] bg-[#0A192F] px-2.5 py-0.5 rounded-full">
                     ACTIVE VOUCHER
                   </div>
                 </div>
@@ -542,7 +536,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#0A192F]/15 flex justify-between items-center text-xs">
+              <div className="pt-3 border-t border-[#0A192F]/10 flex justify-between items-center text-xs">
                 <span className="font-bold text-[#0A192F]">Amount Due at Front Desk</span>
                 <span className="text-xl font-black text-[#0A192F]">₱{totalPrice.toLocaleString()}</span>
               </div>
@@ -552,14 +546,14 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
               <button
                 type="button"
                 onClick={handleReset}
-                className="flex-1 py-3 rounded-xl bg-[#0A192F] text-white font-black text-xs uppercase tracking-wider border border-[#D4AF37] hover:bg-[#112442] transition-colors"
+                className="flex-1 py-3.5 rounded-xl bg-[#0A192F] text-white font-black text-xs uppercase tracking-wider hover:bg-[#112442] shadow-sm transition-colors"
               >
                 Close & Return
               </button>
               <button
                 type="button"
                 onClick={() => setIsSubmitted(false)}
-                className="py-3 px-4 rounded-xl bg-white text-[#0A192F] border-2 border-[#0A192F] font-bold text-xs hover:bg-[#F5F5DC] transition-colors"
+                className="py-3.5 px-5 rounded-xl bg-stone-100 text-[#0A192F] font-bold text-xs hover:bg-stone-200 transition-colors"
               >
                 Book Another Pass
               </button>
