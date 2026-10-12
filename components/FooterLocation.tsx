@@ -169,10 +169,10 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
               Book hourly passes, private conference suites, or 3rd floor pickleball slots in seconds.
             </p>
 
-            {/* Required Final Navy Blue "Book Today" CTA Button (Sleek Borderless) */}
+            {/* Required Final Navy Blue "Book Today" CTA Button (Sleek Borderless, Tactile Hover) */}
             <button
               onClick={onOpenBooking}
-              className="w-full py-4 rounded-xl bg-[#0A192F] hover:bg-black text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-sm hover:scale-[1.01] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+              className="w-full py-4 rounded-xl bg-[#0A192F] text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-blue-900/90 active:scale-95 flex items-center justify-center gap-2 cursor-pointer group"
             >
               <span>Book Today</span>
               <ArrowRight className="w-4 h-4 text-[#D4AF37] group-hover:translate-x-1 transition-transform" />

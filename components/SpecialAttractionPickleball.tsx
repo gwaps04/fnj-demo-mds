@@ -66,7 +66,7 @@ export function SpecialAttractionPickleball({
               <div className="pt-3 flex flex-wrap items-center gap-4">
                 <button
                   onClick={onOpenBooking}
-                  className="px-8 py-4 rounded-xl bg-[#D4AF37] hover:bg-[#b8952b] text-[#0A192F] font-black text-xs sm:text-sm uppercase tracking-wider shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-98 transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-8 py-4 rounded-xl bg-[#D4AF37] text-[#0A192F] font-black text-xs sm:text-sm uppercase tracking-wider shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-[#b8952b] active:scale-95 flex items-center gap-2 cursor-pointer"
                 >
                   <span>Book Pickleball Slot</span>
                   <ArrowRight className="w-4 h-4 text-[#0A192F]" />

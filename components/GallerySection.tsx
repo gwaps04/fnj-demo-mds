@@ -82,7 +82,7 @@ export function GallerySection() {
           </p>
         </div>
 
-        {/* Refined Borderless Filter Pills */}
+        {/* Refined Borderless Filter Pills with Smooth Hover */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-14">
           {[
             { id: "all", label: "All Spaces" },
@@ -94,7 +94,7 @@ export function GallerySection() {
             <button
               key={tab.id}
               onClick={() => setActiveFilter(tab.id)}
-              className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                 activeFilter === tab.id
                   ? "bg-[#0A192F] text-[#D4AF37] shadow-sm"
                   : "bg-white text-[#0A192F]/70 hover:text-[#0A192F] shadow-sm"
@@ -105,22 +105,17 @@ export function GallerySection() {
           ))}
         </div>
 
-        {/* 6 Responsive Image Blocks Grid: Pure White Background, Soft Shadows, Zero Harsh Borders */}
+        {/* 6 Responsive Image Blocks Grid: Pure White Background, Tactile Hover Pulse (-translate-y-2 & shadow-xl) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {filteredItems.map((item) => (
             <div
               key={item.id}
-              className={`group relative rounded-3xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] bg-white transition-all duration-300 ${item.aspect}`}
+              className={`group relative rounded-3xl overflow-hidden shadow-sm bg-white transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl cursor-pointer ${item.aspect}`}
             >
-              {/* 
-                ========================================================================
-                [IMAGE PLACEHOLDER: GALLERY BLOCK #{item.id}]
-                Target Asset File: /public/{item.targetFileName}
-                ========================================================================
-              */}
+              {/* Image Container */}
               <div className="relative w-full min-h-[280px] sm:min-h-[320px] h-full flex flex-col items-center justify-center p-8 text-center bg-stone-100/70 group-hover:bg-stone-100 transition-colors">
                 {/* Borderless Icon Container */}
-                <div className="w-16 h-16 rounded-2xl bg-[#0A192F] flex items-center justify-center text-[#D4AF37] shadow-sm group-hover:scale-105 transition-transform mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-[#0A192F] flex items-center justify-center text-[#D4AF37] shadow-sm group-hover:scale-110 transition-transform duration-300 mb-4">
                   <ImageIcon className="w-8 h-8" />
                 </div>
 

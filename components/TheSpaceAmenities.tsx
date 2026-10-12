@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export function TheSpaceAmenities() {
-  // Required 4 Core Amenities
+  // Required 4 Core Amenities with concisely sized single-line badges
   const coreAmenities = [
     {
       id: "internet",
@@ -26,7 +26,7 @@ export function TheSpaceAmenities() {
     {
       id: "power",
       title: "POWER OUTLETS",
-      badge: "Generator-Backed",
+      badge: "Zero Outages",
       description:
         "Abundant dedicated 220V power outlets and surge-protected strips at every workstation. Brownout-proof automatic diesel generator on site.",
       icon: Zap,
@@ -34,7 +34,7 @@ export function TheSpaceAmenities() {
     {
       id: "aircon",
       title: "AIRCONDITIONED SPACE",
-      badge: "Inverter Climate",
+      badge: "Inverter AC",
       description:
         "Whisper-quiet commercial inverter air-conditioning maintaining a crisp, refreshing, and odor-free working environment throughout the day.",
       icon: Wind,
@@ -42,7 +42,7 @@ export function TheSpaceAmenities() {
     {
       id: "environment",
       title: "COMFORTABLE ENVIRONMENT",
-      badge: "Ergonomic & Quiet",
+      badge: "Quiet Focus",
       description:
         "Ergonomic mesh chairs, spacious wooden desk surfaces, sound-dampened acoustic ambiance, and natural daylight for zero eye fatigue.",
       icon: Armchair,
@@ -75,40 +75,44 @@ export function TheSpaceAmenities() {
           </p>
         </div>
 
-        {/* 4 Core Amenities: Pure White Cards with Soft Subtle Shadows and Zero Harsh Borders */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        {/* 4 Core Amenities: Perfectly Aligned & Responsive Across All Breakpoints */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8 mb-16 items-stretch">
           {coreAmenities.map((amenity) => {
             const IconComponent = amenity.icon;
             return (
               <div
                 key={amenity.id}
-                className="relative rounded-3xl bg-white p-8 sm:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group"
+                className="relative rounded-3xl bg-white p-6 sm:p-7 lg:p-8 shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl flex flex-col justify-between h-full group cursor-default"
               >
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    {/* Sleek Borderless Icon Container */}
-                    <div className="w-14 h-14 rounded-2xl bg-[#0A192F] flex items-center justify-center text-[#D4AF37] shadow-sm group-hover:scale-105 transition-transform">
-                      <IconComponent className="w-7 h-7" />
+                <div className="space-y-5">
+                  {/* Top Row: Perfectly Centered Icon & Single-Line Badge */}
+                  <div className="flex items-center justify-between gap-2.5">
+                    {/* Vibrant FNJ Gold Square with Dark Navy Icon */}
+                    <div className="w-12 h-12 rounded-2xl bg-[#D4AF37] flex items-center justify-center text-[#0A192F] shadow-sm shrink-0 group-hover:scale-105 transition-transform duration-300">
+                      <IconComponent className="w-6 h-6 stroke-[2.5]" />
                     </div>
 
-                    {/* Sleek Borderless Badge */}
-                    <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#0A192F] text-[#D4AF37]">
+                    {/* Single-Line Sleek Pill Badge (Zero Wrapping) */}
+                    <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#0A192F] text-[#D4AF37] whitespace-nowrap shrink-0 shadow-xs">
                       {amenity.badge}
                     </span>
                   </div>
 
-                  <div className="space-y-2.5">
-                    <h3 className="text-lg font-black tracking-wide text-[#0A192F]">
+                  {/* Title with Fixed Min-Height for Identical Horizontal Baselines */}
+                  <div className="min-h-[52px] flex items-center">
+                    <h3 className="text-base sm:text-lg font-black tracking-tight text-[#0A192F] leading-tight">
                       {amenity.title}
                     </h3>
-
-                    <p className="text-xs sm:text-sm text-[#0A192F]/70 leading-relaxed font-normal">
-                      {amenity.description}
-                    </p>
                   </div>
+
+                  {/* Description with Matched Min-Height */}
+                  <p className="text-xs sm:text-sm text-[#0A192F]/70 leading-relaxed font-normal min-h-[76px] sm:min-h-[84px]">
+                    {amenity.description}
+                  </p>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-stone-100 flex items-center gap-2 text-xs text-[#0A192F] font-semibold">
+                {/* Bottom Baseline: Perfectly Aligned across all 4 cards */}
+                <div className="mt-6 pt-4 border-t border-stone-100 flex items-center gap-2 text-xs text-[#0A192F] font-semibold">
                   <CheckCircle className="w-4 h-4 text-[#D4AF37] shrink-0" />
                   <span>Included in every pass</span>
                 </div>
@@ -117,12 +121,12 @@ export function TheSpaceAmenities() {
           })}
         </div>
 
-        {/* Albay Local Power Continuity: Pure White Card with Soft Shadow and Zero Harsh Borders */}
-        <div className="rounded-3xl bg-white p-8 sm:p-12 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+        {/* Albay Local Power Continuity: Pure White Card with Tactile Hover Pulse */}
+        <div className="rounded-3xl bg-white p-8 sm:p-12 shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
           <div className="grid md:grid-cols-12 gap-8 items-center">
             <div className="md:col-span-8 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0A192F] text-[#D4AF37] text-xs font-black uppercase tracking-wider">
-                <Zap className="w-3.5 h-3.5" /> Albay Power Continuity Standard
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#D4AF37] text-[#0A192F] text-xs font-black uppercase tracking-wider shadow-sm">
+                <Zap className="w-3.5 h-3.5 fill-[#0A192F]" /> Albay Power Continuity Standard
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-[#0A192F] tracking-tight">
                 Brownouts? Never a Blip on Your Screen.

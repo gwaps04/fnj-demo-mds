@@ -165,7 +165,7 @@ export function HeroCarousel({ onOpenBooking }: HeroCarouselProps) {
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={onOpenBooking}
-                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-extrabold text-sm sm:text-base uppercase tracking-wider border-2 border-[#D4AF37] shadow-2xl hover:shadow-[#D4AF37]/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer group"
+                className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#0A192F] text-white font-extrabold text-sm sm:text-base uppercase tracking-wider shadow-lg transition-transform duration-200 hover:scale-105 hover:bg-blue-900/90 active:scale-95 flex items-center justify-center gap-3 cursor-pointer group"
               >
                 <span>Book Your Space Today!</span>
                 <ArrowRight className="w-5 h-5 text-[#D4AF37] group-hover:translate-x-1 transition-transform" />
@@ -173,7 +173,7 @@ export function HeroCarousel({ onOpenBooking }: HeroCarouselProps) {
 
               <a
                 href="#pricing"
-                className="w-full sm:w-auto px-6 py-4 rounded-xl bg-[#F5F5DC]/90 hover:bg-[#F5F5DC] text-[#0A192F] font-bold text-sm sm:text-base border-2 border-[#0A192F] shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-7 py-4 rounded-full bg-white/95 hover:bg-white text-[#0A192F] font-bold text-sm sm:text-base shadow-md transition-transform duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
               >
                 <span>View Rates & Passes</span>
               </a>
@@ -181,7 +181,7 @@ export function HeroCarousel({ onOpenBooking }: HeroCarouselProps) {
 
             {/* Current Slide Caption Bar */}
             <div className="pt-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-black/40 backdrop-blur-sm border border-white/20 text-xs text-stone-300">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md text-xs text-stone-300">
                 <span className="font-bold text-[#D4AF37]">Slide {currentIndex + 1} of 7:</span>
                 <span>{slides[currentIndex].title} — {slides[currentIndex].tagline}</span>
               </div>
@@ -193,30 +193,30 @@ export function HeroCarousel({ onOpenBooking }: HeroCarouselProps) {
         <button
           onClick={prevSlide}
           aria-label="Previous slide"
-          className="absolute left-4 sm:left-8 z-30 p-3 rounded-full bg-[#0A192F]/80 hover:bg-[#0A192F] text-white border-2 border-[#D4AF37] transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-xl"
+          className="absolute left-4 sm:left-8 z-30 p-3.5 rounded-full bg-white/80 hover:bg-white text-[#0A192F] backdrop-blur-md transition-transform duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md"
         >
-          <ChevronLeft className="w-5 h-5 text-[#D4AF37]" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
 
         <button
           onClick={nextSlide}
           aria-label="Next slide"
-          className="absolute right-4 sm:right-8 z-30 p-3 rounded-full bg-[#0A192F]/80 hover:bg-[#0A192F] text-white border-2 border-[#D4AF37] transition-all hover:scale-110 active:scale-95 cursor-pointer shadow-xl"
+          className="absolute right-4 sm:right-8 z-30 p-3.5 rounded-full bg-white/80 hover:bg-white text-[#0A192F] backdrop-blur-md transition-transform duration-200 hover:scale-110 active:scale-95 cursor-pointer shadow-md"
         >
-          <ChevronRight className="w-5 h-5 text-[#D4AF37]" />
+          <ChevronRight className="w-5 h-5" />
         </button>
 
         {/* Slide Indicator Dots & Play/Pause Control (7 slots for hero1.jpg - hero7.jpg) */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 py-2 rounded-full bg-[#0A192F]/85 border border-[#D4AF37]/50 backdrop-blur-md shadow-2xl">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-md shadow-md">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             aria-label={isPlaying ? "Pause autoplay" : "Start autoplay"}
-            className="p-1 rounded text-stone-300 hover:text-[#D4AF37] transition-colors"
+            className="p-1 rounded text-[#0A192F] hover:text-[#D4AF37] transition-colors"
           >
             {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
           </button>
 
-          <div className="h-4 w-px bg-white/20 mx-1" />
+          <div className="h-4 w-px bg-[#0A192F]/20 mx-1" />
 
           {slides.map((slide, idx) => (
             <button
@@ -225,8 +225,8 @@ export function HeroCarousel({ onOpenBooking }: HeroCarouselProps) {
               aria-label={`Jump to slide ${idx + 1} (${slide.fileName})`}
               className={`transition-all rounded-full ${
                 currentIndex === idx
-                  ? "w-8 h-2.5 bg-[#D4AF37] shadow-sm"
-                  : "w-2.5 h-2.5 bg-white/40 hover:bg-white/80"
+                  ? "w-8 h-2.5 bg-[#0A192F] shadow-sm"
+                  : "w-2.5 h-2.5 bg-[#0A192F]/30 hover:bg-[#0A192F]/60"
               }`}
               title={`${slide.fileName}: ${slide.title}`}
             />

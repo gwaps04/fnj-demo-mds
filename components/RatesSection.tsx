@@ -79,12 +79,12 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
           </p>
         </div>
 
-        {/* Refined Borderless Pill Switcher */}
+        {/* Refined Borderless Pill Switcher with Smooth Hover */}
         <div className="flex justify-center mb-14">
-          <div className="inline-flex p-1.5 rounded-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+          <div className="inline-flex p-1.5 rounded-full bg-white shadow-sm">
             <button
               onClick={() => setActiveTab("regular")}
-              className={`px-7 py-3 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-7 py-3 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-2 cursor-pointer ${
                 activeTab === "regular"
                   ? "bg-[#0A192F] text-[#D4AF37] shadow-sm"
                   : "text-[#0A192F]/70 hover:text-[#0A192F]"
@@ -96,7 +96,7 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
 
             <button
               onClick={() => setActiveTab("student")}
-              className={`px-7 py-3 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-7 py-3 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-2 cursor-pointer ${
                 activeTab === "student"
                   ? "bg-[#0A192F] text-[#D4AF37] shadow-sm"
                   : "text-[#0A192F]/70 hover:text-[#0A192F]"
@@ -108,8 +108,8 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
           </div>
         </div>
 
-        {/* 4 Hourly Rates Cards: Pure White, Soft Shadow, Generous Padding p-8 to p-10, No Borders */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+        {/* 4 Hourly Rates Cards: Pure White Cards with Tactile Hover (-translate-y-2 & shadow-xl) and Tactile Buttons */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8 mb-20 items-stretch">
           {rateTiers.map((tier, idx) => {
             const price = activeTab === "student" ? tier.studentPrice : tier.regularPrice;
             const isFeatured = idx === 3; // 8 Hours
@@ -117,7 +117,7 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
             return (
               <div
                 key={idx}
-                className="rounded-3xl p-8 sm:p-10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative"
+                className="rounded-3xl p-6 sm:p-7 lg:p-8 bg-white shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl flex flex-col justify-between h-full relative cursor-default"
               >
                 {isFeatured && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#0A192F] text-[#D4AF37] text-[10px] font-black uppercase tracking-wider shadow-sm whitespace-nowrap">
@@ -180,9 +180,10 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
                 </div>
 
                 <div className="pt-8 mt-6 border-t border-stone-100">
+                  {/* Tactile Button: Hover scale-105 & hover:bg-blue-900/90 */}
                   <button
                     onClick={onOpenBooking}
-                    className="w-full py-3.5 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-black text-xs uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-xl bg-[#0A192F] text-white font-black text-xs uppercase tracking-wider shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-blue-900/90 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Book Now</span>
                     <ArrowRight className="w-3.5 h-3.5 text-[#D4AF37]" />
@@ -193,8 +194,8 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
           })}
         </div>
 
-        {/* Side-by-Side Comparison Summary Table: Pure White, Soft Shadow, Borderless */}
-        <div className="mb-20 overflow-hidden rounded-3xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+        {/* Side-by-Side Comparison Summary Table: Tactile Hover on Container and Action Buttons */}
+        <div className="mb-20 overflow-hidden rounded-3xl bg-white shadow-sm transition-all duration-300 ease-in-out hover:shadow-xl">
           <div className="bg-[#0A192F] px-8 py-5 flex items-center justify-between">
             <h4 className="text-sm sm:text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
               <span className="text-[#D4AF37]">★</span> Hourly Rate Comparison Table
@@ -225,7 +226,7 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
                     <td className="py-4 px-6 sm:px-8 text-right">
                       <button
                         onClick={onOpenBooking}
-                        className="px-4 py-2 rounded-lg bg-[#0A192F] text-[#D4AF37] text-xs font-black uppercase hover:bg-[#112442] transition-all cursor-pointer shadow-sm"
+                        className="px-4 py-2 rounded-lg bg-[#0A192F] text-[#D4AF37] text-xs font-black uppercase shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-blue-900/90 active:scale-95 cursor-pointer"
                       >
                         Book Now
                       </button>
@@ -237,10 +238,10 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
           </div>
         </div>
 
-        {/* Featured Offer Cards: Pure White Conference Room + Solid Navy 1 Month Subscription (Both Borderless) */}
+        {/* Featured Offer Cards with Tactile Hover Pulse */}
         <div className="grid md:grid-cols-12 gap-8">
-          {/* Conference Room Details: 1 TO 10 PAX, ₱700.00 PER HOUR (Pure White Card, p-8 to p-10, Soft Shadow) */}
-          <div className="md:col-span-6 rounded-3xl bg-white p-8 sm:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex flex-col justify-between">
+          {/* Conference Room Details: Tactile Hover Pure White Card */}
+          <div className="md:col-span-6 rounded-3xl bg-white p-8 sm:p-10 shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl flex flex-col justify-between cursor-default">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#0A192F] text-[#D4AF37]">
@@ -294,7 +295,7 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
             <div className="pt-8 mt-6 border-t border-stone-100">
               <button
                 onClick={onOpenBooking}
-                className="w-full py-4 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-black text-xs uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 rounded-xl bg-[#0A192F] text-white font-black text-xs uppercase tracking-wider shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-blue-900/90 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Book Conference Room</span>
                 <ArrowRight className="w-4 h-4 text-[#D4AF37]" />
@@ -302,8 +303,8 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
             </div>
           </div>
 
-          {/* Highlighted Subscription: 1 MONTH SUBSCRIPTION for ₱9,000.00 (Solid Navy Blue, Borderless, Soft Shadow) */}
-          <div className="md:col-span-6 rounded-3xl bg-[#0A192F] text-white p-8 sm:p-10 shadow-[0_10px_30px_rgba(10,25,47,0.12)] flex flex-col justify-between relative">
+          {/* Highlighted Subscription: Tactile Hover Solid Navy Blue Card */}
+          <div className="md:col-span-6 rounded-3xl bg-[#0A192F] text-white p-8 sm:p-10 shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl flex flex-col justify-between relative cursor-default">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#D4AF37] text-[#0A192F] shadow-sm flex items-center gap-1.5">
@@ -365,7 +366,7 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
             <div className="pt-8 mt-6 border-t border-white/10">
               <button
                 onClick={onOpenBooking}
-                className="w-full py-4 rounded-xl bg-[#D4AF37] hover:bg-[#b8952b] text-[#0A192F] font-black text-xs uppercase tracking-wider shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 rounded-xl bg-[#D4AF37] text-[#0A192F] font-black text-xs uppercase tracking-wider shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-[#b8952b] active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Subscribe for ₱9,000.00</span>
                 <ArrowRight className="w-4 h-4 text-[#0A192F]" />

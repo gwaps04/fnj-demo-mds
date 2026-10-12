@@ -467,10 +467,10 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 </p>
               </div>
 
-              {/* Navy Blue Primary Submit CTA Button (Sleek Borderless) */}
+              {/* Navy Blue Primary Submit CTA Button (Sleek Borderless, Tactile Hover) */}
               <button
                 type="submit"
-                className="w-full py-4 rounded-xl bg-[#0A192F] hover:bg-[#112442] text-white font-black text-sm uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 rounded-xl bg-[#0A192F] text-white font-black text-sm uppercase tracking-wider shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-blue-900/90 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Confirm Reservation</span>
                 <ArrowRight className="w-4 h-4 text-[#D4AF37]" />
