@@ -3,9 +3,7 @@
 // FILE: app/admin/page.tsx
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
-import QRCode from "qrcode";
 import {
-  LayoutDashboard,
   Calendar,
   Clock,
   Users,
@@ -19,22 +17,19 @@ import {
   QrCode,
   Download,
   Trash2,
-  Check,
   X,
-  MapPin,
   TrendingUp,
   DollarSign,
-  Coffee,
   Trophy,
-  Briefcase,
   GraduationCap,
   Sparkles,
   Phone,
   Mail,
-  User,
   SlidersHorizontal,
-  ChevronDown,
-  Building,
+  ChevronRight,
+  Eye,
+  Check,
+  Copy,
 } from "lucide-react";
 import {
   getBookings,
@@ -45,6 +40,7 @@ import {
   BookingRecord,
   calculateDepartureTime,
 } from "@/lib/bookings";
+import { generateBrandedQrDataUrl } from "@/lib/brandedQr";
 
 export default function AdminCrmDashboardPage() {
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
@@ -56,6 +52,7 @@ export default function AdminCrmDashboardPage() {
   // Inspection modal for QR pass
   const [inspectingBooking, setInspectingBooking] = useState<BookingRecord | null>(null);
   const [inspectingQrDataUrl, setInspectingQrDataUrl] = useState<string>("");
+  const [isCopiedVoucher, setIsCopiedVoucher] = useState<boolean>(false);
 
   // Manual Walk-in Drawer / Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
@@ -90,7 +87,7 @@ export default function AdminCrmDashboardPage() {
     };
   }, [refreshBookings]);
 
-  // Generate QR for inspected booking
+  // Generate Branded QR Code for inspected booking with FNJ Center Medallion, Date & Time
   useEffect(() => {
     if (inspectingBooking) {
       const payload = JSON.stringify({
@@ -108,10 +105,15 @@ export default function AdminCrmDashboardPage() {
         status: inspectingBooking.status,
       });
 
-      QRCode.toDataURL(payload, {
-        width: 320,
-        margin: 2,
-        color: { dark: "#0A192F", light: "#FFFFFF" },
+      generateBrandedQrDataUrl({
+        payloadText: payload,
+        voucherCode: inspectingBooking.voucherCode,
+        guestName: inspectingBooking.guestName,
+        arrivalDate: inspectingBooking.arrivalDate,
+        arrivalTime: inspectingBooking.arrivalTime,
+        departureTime: inspectingBooking.departureTime,
+        zoneOrPlan: inspectingBooking.recommendedTitle,
+        rateCategory: inspectingBooking.isStudent ? "Student Rate" : "Regular Rate",
       })
         .then((url) => setInspectingQrDataUrl(url))
         .catch(() => setInspectingQrDataUrl(""));
@@ -126,7 +128,7 @@ export default function AdminCrmDashboardPage() {
   // Filtered Bookings
   const filteredBookings = useMemo(() => {
     return bookings.filter((b) => {
-      // Search
+      // Search query
       const matchesSearch =
         b.guestName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         b.voucherCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -136,16 +138,16 @@ export default function AdminCrmDashboardPage() {
       if (!matchesSearch) return false;
 
       // Zone Filter
-      if (selectedZoneFilter === "Silent Study" && !b.environment.includes("silent")) {
+      if (selectedZoneFilter === "Silent Study" && !b.environment.toLowerCase().includes("silent")) {
         return false;
       }
-      if (selectedZoneFilter === "Hot Desk" && !b.environment.includes("hot desk")) {
+      if (selectedZoneFilter === "Hot Desk" && !b.environment.toLowerCase().includes("hot desk")) {
         return false;
       }
-      if (selectedZoneFilter === "Conference" && !b.addons.includes("Conference Room")) {
+      if (selectedZoneFilter === "Conference" && !b.addons.toLowerCase().includes("conference")) {
         return false;
       }
-      if (selectedZoneFilter === "Pickleball" && !b.addons.includes("Pickleball")) {
+      if (selectedZoneFilter === "Pickleball" && !b.addons.toLowerCase().includes("pickleball")) {
         return false;
       }
 
@@ -176,23 +178,48 @@ export default function AdminCrmDashboardPage() {
     };
   }, [bookings, todayStr]);
 
-  // Actions
+  // Status Change
   const handleStatusChange = (id: string, newStatus: BookingRecord["status"]) => {
     updateBookingStatus(id, newStatus);
     refreshBookings();
   };
 
+  // Delete Record
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to remove this booking from the live schedule?")) {
       deleteBooking(id);
       refreshBookings();
+      if (inspectingBooking?.id === id) {
+        setInspectingBooking(null);
+      }
     }
   };
 
+  // Reset Data to Realistic Albay Seeds
   const handleResetData = () => {
     if (confirm("Reset to default realistic Albay seed bookings?")) {
       resetToSeedBookings();
       refreshBookings();
+    }
+  };
+
+  // Download Inspected Branded Pass PNG
+  const handleDownloadInspectedQr = () => {
+    if (!inspectingQrDataUrl || !inspectingBooking) return;
+    const link = document.createElement("a");
+    link.href = inspectingQrDataUrl;
+    link.download = `${inspectingBooking.voucherCode}-FNJ-BRANDED-PASS.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Copy Voucher Code
+  const handleCopyVoucher = (code: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(code);
+      setIsCopiedVoucher(true);
+      setTimeout(() => setIsCopiedVoucher(false), 2000);
     }
   };
 
@@ -306,149 +333,151 @@ export default function AdminCrmDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5DC] text-[#0A192F] font-sans flex flex-col">
-      {/* 1. TOP EXECUTIVE HEADER */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200/80 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
-          {/* Brand & CRM Title */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="w-10 h-10 rounded-xl bg-[#0A192F] text-[#D4AF37] font-black text-sm flex items-center justify-center shadow-xs hover:scale-105 transition-transform"
-              title="Return to Public Website"
-            >
-              FNJ
-            </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-black text-base sm:text-lg text-[#0A192F] tracking-tight flex items-center gap-2">
-                  <span>FNJ Operations CRM</span>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+    <div className="min-h-screen bg-[#F5F5DC] text-[#0A192F] font-sans flex flex-col w-full overflow-x-hidden">
+      {/* 1. RESPONSIVE EXECUTIVE CRM HEADER */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-xs">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            {/* Top / Left: Brand & Hub Title */}
+            <div className="flex items-center gap-3">
+              <Link
+                href="/"
+                className="w-10 h-10 min-w-[40px] rounded-xl bg-[#0A192F] text-[#D4AF37] font-black text-sm flex items-center justify-center shadow-xs hover:scale-105 transition-transform"
+                title="Return to Public Website"
+              >
+                FNJ
+              </Link>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="font-black text-base sm:text-lg text-[#0A192F] tracking-tight truncate">
+                    FNJ Operations CRM
+                  </h1>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
                     Live Albay Hub
                   </span>
-                </h1>
+                </div>
+                <p className="text-[11px] text-stone-500 font-medium truncate">
+                  2F Biak Realty Corp., Lakandula Dr., Daraga, Albay
+                </p>
               </div>
-              <p className="text-[11px] text-stone-500 font-medium">
-                2F Biak Realty Corp., Lakandula Dr., Daraga, Albay
-              </p>
             </div>
-          </div>
 
-          {/* Action Links & Back to Public Site */}
-          <div className="flex items-center gap-2.5">
-            <Link
-              href="/"
-              className="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-bold text-[#0A192F] hover:bg-stone-100 border border-stone-200/80 transition-colors flex items-center gap-1.5"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">View Public Website</span>
-            </Link>
+            {/* Right / Actions Row */}
+            <div className="flex items-center gap-2 self-end sm:self-auto w-full sm:w-auto justify-end">
+              <Link
+                href="/"
+                className="min-h-[40px] px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold text-[#0A192F] hover:bg-stone-100 border border-stone-200/80 transition-colors flex items-center gap-1.5"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Public Site</span>
+              </Link>
 
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="min-h-[40px] px-4 py-2 rounded-xl text-xs font-black bg-[#0A192F] text-white hover:bg-blue-900 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>Register Walk-In</span>
-            </button>
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="min-h-[40px] px-3.5 sm:px-4 py-2 rounded-xl text-xs font-black bg-[#0A192F] text-white hover:bg-blue-900 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>Register Walk-In</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* 2. MAIN CRM DASHBOARD CONTENT */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* KPI METRICS ROW */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8">
+        {/* KPI METRICS ROW - 5-TIER RESPONSIVE GRID */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
           {/* Card 1: Today's Bookings */}
-          <div className="p-5 rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-2">
-            <div className="flex items-center justify-between text-stone-500 text-xs font-bold">
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+            <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
               <span>Today&apos;s Bookings</span>
-              <Calendar className="w-4 h-4 text-[#D4AF37]" />
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-[#0A192F]">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
               {metrics.totalToday}
             </div>
-            <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+            <div className="text-[10px] sm:text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />
               <span>{metrics.totalCount} total in system</span>
             </div>
           </div>
 
           {/* Card 2: Currently Checked In */}
-          <div className="p-5 rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-2">
-            <div className="flex items-center justify-between text-stone-500 text-xs font-bold">
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+            <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
               <span>Currently Seated</span>
-              <Users className="w-4 h-4 text-emerald-600" />
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" />
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-800">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-800">
               {metrics.checkedInCount}
             </div>
-            <div className="text-[11px] text-stone-500 font-medium">
-              Checked-in at 2nd Floor desk
+            <div className="text-[10px] sm:text-[11px] text-stone-500 font-medium truncate">
+              Checked-in at 2F desk
             </div>
           </div>
 
           {/* Card 3: Projected Revenue */}
-          <div className="p-5 rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-2">
-            <div className="flex items-center justify-between text-stone-500 text-xs font-bold">
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+            <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
               <span>Est. Revenue Value</span>
-              <DollarSign className="w-4 h-4 text-[#D4AF37]" />
+              <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-[#0A192F]">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
               ₱{metrics.totalRevenue.toLocaleString()}
             </div>
-            <div className="text-[11px] text-[#D4AF37] font-bold">
+            <div className="text-[10px] sm:text-[11px] text-[#D4AF37] font-bold truncate">
               Albay best value rate tiers
             </div>
           </div>
 
           {/* Card 4: Specialized Spaces */}
-          <div className="p-5 rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-2">
-            <div className="flex items-center justify-between text-stone-500 text-xs font-bold">
+          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+            <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
               <span>Boardroom & Pickleball</span>
-              <Trophy className="w-4 h-4 text-amber-600" />
+              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" />
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-[#0A192F]">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
               {metrics.pickleballOrConf}
             </div>
-            <div className="text-[11px] text-stone-500 font-medium">
-              Specialized facility bookings
+            <div className="text-[10px] sm:text-[11px] text-stone-500 font-medium truncate">
+              Specialized bookings
             </div>
           </div>
         </div>
 
         {/* 3. CONTROLS, SEARCH, AND VIEW SWITCHER */}
-        <div className="bg-white p-5 rounded-3xl border border-stone-200/80 shadow-xs space-y-4">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-stone-200/80 shadow-xs space-y-3 sm:space-y-4">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative w-full md:max-w-md">
               <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search guest name, voucher ID, phone, or email..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-stone-200 text-xs sm:text-sm bg-stone-50/60 text-[#0A192F] focus:outline-none focus:bg-white focus:border-[#0A192F] transition-all"
+                placeholder="Search guest, voucher, phone, email..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl sm:rounded-2xl border border-stone-200 text-xs sm:text-sm bg-stone-50/60 text-[#0A192F] focus:outline-none focus:bg-white focus:border-[#0A192F] transition-all"
               />
             </div>
 
-            {/* View Tabs & Export */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            {/* View Tabs & Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2">
               {/* Tab Selector */}
-              <div className="p-1 bg-stone-100 rounded-2xl flex items-center shrink-0">
+              <div className="p-1 bg-stone-100 rounded-xl sm:rounded-2xl flex items-center shrink-0">
                 <button
                   onClick={() => setActiveViewTab("table")}
-                  className={`min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  className={`min-h-[36px] px-3 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-black transition-all cursor-pointer ${
                     activeViewTab === "table"
                       ? "bg-[#0A192F] text-white shadow-xs"
                       : "text-stone-600 hover:text-[#0A192F]"
                   }`}
                 >
-                  Schedule Table
+                  Schedule View
                 </button>
                 <button
                   onClick={() => setActiveViewTab("timeline")}
-                  className={`min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  className={`min-h-[36px] px-3 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-black transition-all cursor-pointer ${
                     activeViewTab === "timeline"
                       ? "bg-[#0A192F] text-white shadow-xs"
                       : "text-stone-600 hover:text-[#0A192F]"
@@ -461,17 +490,17 @@ export default function AdminCrmDashboardPage() {
               {/* Export CSV */}
               <button
                 onClick={handleExportCsv}
-                className="min-h-[38px] px-3.5 py-2 rounded-xl text-xs font-bold bg-stone-100 hover:bg-stone-200 text-[#0A192F] transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="min-h-[38px] px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold bg-stone-100 hover:bg-stone-200 text-[#0A192F] transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
                 title="Export bookings to CSV"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Export CSV</span>
+                <span className="hidden xs:inline">Export CSV</span>
               </button>
 
               {/* Reset Seed Data */}
               <button
                 onClick={handleResetData}
-                className="min-h-[38px] px-3.5 py-2 rounded-xl text-xs font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="min-h-[38px] px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
                 title="Reset mock database to realistic defaults"
               >
                 <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
@@ -480,8 +509,8 @@ export default function AdminCrmDashboardPage() {
             </div>
           </div>
 
-          {/* Quick Filter Chips */}
-          <div className="flex items-center gap-2 overflow-x-auto pt-1 scrollbar-none text-xs">
+          {/* Quick Filter Chips (Fluid horizontal scrolling) */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin text-xs">
             <span className="text-stone-400 font-bold text-[11px] uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
               <Filter className="w-3 h-3" />
               <span>Zone:</span>
@@ -501,7 +530,7 @@ export default function AdminCrmDashboardPage() {
               </button>
             ))}
 
-            <div className="h-4 w-px bg-stone-300 mx-2 shrink-0" />
+            <div className="h-4 w-px bg-stone-300 mx-1 shrink-0" />
 
             {/* Date filter */}
             <button
@@ -518,181 +547,300 @@ export default function AdminCrmDashboardPage() {
           </div>
         </div>
 
-        {/* 4. VIEW RENDER: TABLE VIEW OR TIMELINE VIEW */}
+        {/* 4. VIEW RENDER: SCHEDULE VIEW OR TIMELINE VIEW */}
         {activeViewTab === "table" ? (
-          /* ======================================================== */
-          /* TABLE VIEW: CLEAN SCHEDULE DATA TABLE                    */
-          /* ======================================================== */
-          <div className="bg-white rounded-3xl border border-stone-200/80 shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm min-w-[840px]">
-                <thead className="bg-[#0A192F] text-white text-[11px] font-black uppercase tracking-wider">
-                  <tr>
-                    <th className="py-4 px-6">Voucher & Guest</th>
-                    <th className="py-4 px-6">Schedule Slot</th>
-                    <th className="py-4 px-6">Zone & Duration</th>
-                    <th className="py-4 px-6">Rate & Fee</th>
-                    <th className="py-4 px-6">Status</th>
-                    <th className="py-4 px-6 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-100 text-[#0A192F]">
-                  {filteredBookings.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="py-12 text-center text-stone-400">
-                        <div className="max-w-xs mx-auto space-y-2">
-                          <AlertCircle className="w-8 h-8 text-stone-300 mx-auto" />
-                          <p className="font-bold text-sm text-stone-600">No reservations match filters</p>
-                          <p className="text-xs">
-                            Try adjusting your search terms or clearing zone filters.
-                          </p>
+          <div className="space-y-4">
+            {/* ======================================================== */}
+            {/* 4A. MOBILE RESERVATION CARDS FEED (Screen < 768px: md:hidden) */}
+            {/* ======================================================== */}
+            <div className="md:hidden space-y-3">
+              {filteredBookings.length === 0 ? (
+                <div className="bg-white rounded-2xl p-8 text-center text-stone-400 border border-stone-200/80">
+                  <AlertCircle className="w-8 h-8 text-stone-300 mx-auto mb-2" />
+                  <p className="font-bold text-sm text-stone-600">No reservations match filters</p>
+                  <p className="text-xs">Try adjusting search or clearing filters.</p>
+                </div>
+              ) : (
+                filteredBookings.map((b) => {
+                  const isToday = b.arrivalDate === todayStr;
+                  return (
+                    <div
+                      key={b.id}
+                      className="bg-white rounded-2xl p-4 border border-stone-200/80 shadow-xs space-y-3"
+                    >
+                      {/* Card Top: Voucher Code + Status Selector */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-black text-xs text-[#0A192F] bg-stone-100 px-2 py-0.5 rounded">
+                            {b.voucherCode}
+                          </span>
+                          {b.isStudent && (
+                            <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded flex items-center gap-1">
+                              <GraduationCap className="w-3 h-3" />
+                              Student
+                            </span>
+                          )}
                         </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredBookings.map((b) => {
-                      const isToday = b.arrivalDate === todayStr;
-                      return (
-                        <tr
-                          key={b.id}
-                          className="hover:bg-stone-50/80 transition-colors group"
+
+                        {/* Status Select */}
+                        <select
+                          value={b.status}
+                          onChange={(e) =>
+                            handleStatusChange(b.id, e.target.value as BookingRecord["status"])
+                          }
+                          className={`text-xs font-black px-2.5 py-1 rounded-lg border-none cursor-pointer focus:outline-none shadow-2xs ${
+                            b.status === "Checked In"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : b.status === "Confirmed"
+                              ? "bg-blue-100 text-blue-900"
+                              : b.status === "Completed"
+                              ? "bg-stone-200 text-stone-700"
+                              : "bg-red-100 text-red-800"
+                          }`}
                         >
-                          {/* 1. Voucher & Guest */}
-                          <td className="py-4 px-6">
-                            <div className="space-y-0.5">
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono font-black text-xs text-[#0A192F] bg-stone-100 px-2 py-0.5 rounded">
-                                  {b.voucherCode}
-                                </span>
-                                {b.isStudent && (
-                                  <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded flex items-center gap-1">
-                                    <GraduationCap className="w-3 h-3" />
-                                    Student
-                                  </span>
-                                )}
-                              </div>
-                              <div className="font-black text-sm text-[#0A192F]">
-                                {b.guestName}
-                              </div>
-                              <div className="text-[11px] text-stone-500">
-                                {b.guestPhone} • {b.guestEmail}
-                              </div>
-                            </div>
-                          </td>
+                          <option value="Confirmed">Confirmed</option>
+                          <option value="Checked In">Checked In</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Cancelled">Cancelled</option>
+                        </select>
+                      </div>
 
-                          {/* 2. Schedule Slot */}
-                          <td className="py-4 px-6">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-1.5 font-bold text-xs">
-                                <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
-                                <span>{b.arrivalDate}</span>
-                                {isToday && (
-                                  <span className="text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">
-                                    Today
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1.5 text-xs text-stone-600 font-mono">
-                                <Clock className="w-3.5 h-3.5 text-stone-400" />
-                                <span>{b.arrivalTime} &rarr; {b.departureTime}</span>
-                              </div>
-                            </div>
-                          </td>
+                      {/* Guest Details */}
+                      <div>
+                        <div
+                          onClick={() => setInspectingBooking(b)}
+                          className="font-black text-sm text-[#0A192F] hover:text-blue-900 cursor-pointer flex items-center justify-between"
+                        >
+                          <span>{b.guestName}</span>
+                          <span className="font-black text-sm text-[#0A192F]">{b.recommendedPrice}</span>
+                        </div>
+                        <div className="text-[11px] text-stone-500 flex flex-wrap gap-x-2 pt-0.5">
+                          <span>{b.guestPhone}</span>
+                          <span>•</span>
+                          <span className="truncate">{b.guestEmail}</span>
+                        </div>
+                      </div>
 
-                          {/* 3. Zone & Duration */}
-                          <td className="py-4 px-6">
-                            <div className="space-y-1">
-                              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-stone-100 text-[#0A192F] inline-block">
-                                {b.environment.replace("The ", "")}
+                      {/* Schedule Highlight Box */}
+                      <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-100 text-xs space-y-1">
+                        <div className="flex items-center justify-between font-bold text-[#0A192F]">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
+                            <span>{b.arrivalDate}</span>
+                            {isToday && (
+                              <span className="text-[9px] font-black uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
+                                Today
                               </span>
-                              <div className="text-xs text-stone-600 font-medium truncate max-w-[200px]">
-                                {b.duration}
-                              </div>
-                              {b.addons !== "Nope, just standard ergonomic seating" && (
-                                <div className="text-[10px] text-amber-800 font-bold flex items-center gap-1">
-                                  <Sparkles className="w-3 h-3 text-[#D4AF37]" />
-                                  <span>{b.addons.replace("The ", "")}</span>
-                                </div>
-                              )}
-                            </div>
-                          </td>
+                            )}
+                          </span>
+                          <span className="flex items-center gap-1 font-mono text-stone-600 text-[11px]">
+                            <Clock className="w-3 h-3 text-stone-400" />
+                            <span>{b.arrivalTime} – {b.departureTime}</span>
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] text-stone-500 pt-0.5">
+                          <span className="truncate">{b.environment.replace("The ", "")}</span>
+                          <span className="font-semibold text-stone-600 shrink-0">{b.duration.replace("The ", "")}</span>
+                        </div>
+                      </div>
 
-                          {/* 4. Rate & Fee */}
-                          <td className="py-4 px-6">
-                            <div className="space-y-0.5">
-                              <div className="font-black text-sm text-[#0A192F]">
-                                {b.recommendedPrice}
-                              </div>
-                              <div className="text-[11px] text-stone-500">
-                                {b.recommendedTitle}
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* 5. Status Badge & Quick Toggle */}
-                          <td className="py-4 px-6">
-                            <select
-                              value={b.status}
-                              onChange={(e) =>
-                                handleStatusChange(b.id, e.target.value as BookingRecord["status"])
-                              }
-                              className={`text-xs font-black px-3 py-1.5 rounded-xl border-none cursor-pointer focus:outline-none shadow-2xs ${
-                                b.status === "Checked In"
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : b.status === "Confirmed"
-                                  ? "bg-blue-100 text-blue-900"
-                                  : b.status === "Completed"
-                                  ? "bg-stone-200 text-stone-700"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              <option value="Confirmed">Confirmed</option>
-                              <option value="Checked In">Checked In</option>
-                              <option value="Completed">Completed</option>
-                              <option value="Cancelled">Cancelled</option>
-                            </select>
-                          </td>
-
-                          {/* 6. Actions */}
-                          <td className="py-4 px-6 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              {/* View Pass QR */}
-                              <button
-                                onClick={() => setInspectingBooking(b)}
-                                className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-[#0A192F] text-stone-700 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-                                title="Inspect Pass QR code & details"
-                              >
-                                <QrCode className="w-4 h-4" />
-                              </button>
-
-                              {/* Delete */}
-                              <button
-                                onClick={() => handleDelete(b.id)}
-                                className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-red-50 text-stone-400 hover:text-red-600 flex items-center justify-center transition-colors cursor-pointer"
-                                title="Delete reservation"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                      {/* Actions Footer */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={() => setInspectingBooking(b)}
+                          className="flex-1 min-h-[38px] py-1.5 px-3 rounded-xl bg-[#0A192F] text-white hover:bg-blue-900 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <QrCode className="w-3.5 h-3.5 text-[#D4AF37]" />
+                          <span>Inspect Branded Pass</span>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(b.id)}
+                          className="min-h-[38px] w-9 rounded-xl bg-stone-100 hover:bg-red-50 text-stone-400 hover:text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                          title="Delete booking"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
-            <div className="bg-stone-50 px-6 py-3 border-t border-stone-200/80 flex items-center justify-between text-xs text-stone-500">
-              <span>Showing {filteredBookings.length} of {bookings.length} reservations</span>
-              <span className="font-semibold">Local Storage Persistence Active</span>
+            {/* ======================================================== */}
+            {/* 4B. DESKTOP / TABLET SCHEDULE TABLE (>= 768px: hidden md:block) */}
+            {/* ======================================================== */}
+            <div className="hidden md:block bg-white rounded-3xl border border-stone-200/80 shadow-xs overflow-hidden">
+              <div className="overflow-x-auto scrollbar-thin">
+                <table className="w-full text-left text-xs lg:text-sm min-w-[760px]">
+                  <thead className="bg-[#0A192F] text-white text-[11px] font-black uppercase tracking-wider">
+                    <tr>
+                      <th className="py-4 px-4 lg:px-6">Voucher & Guest</th>
+                      <th className="py-4 px-4 lg:px-6">Schedule Slot</th>
+                      <th className="py-4 px-4 lg:px-6">Zone & Duration</th>
+                      <th className="py-4 px-4 lg:px-6">Rate & Fee</th>
+                      <th className="py-4 px-4 lg:px-6">Status</th>
+                      <th className="py-4 px-4 lg:px-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-100 text-[#0A192F]">
+                    {filteredBookings.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-12 text-center text-stone-400">
+                          <div className="max-w-xs mx-auto space-y-2">
+                            <AlertCircle className="w-8 h-8 text-stone-300 mx-auto" />
+                            <p className="font-bold text-sm text-stone-600">No reservations match filters</p>
+                            <p className="text-xs">
+                              Try adjusting your search terms or clearing zone filters.
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredBookings.map((b) => {
+                        const isToday = b.arrivalDate === todayStr;
+                        return (
+                          <tr
+                            key={b.id}
+                            className="hover:bg-stone-50/80 transition-colors group"
+                          >
+                            {/* 1. Voucher & Guest */}
+                            <td className="py-4 px-4 lg:px-6">
+                              <div className="space-y-0.5">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-mono font-black text-xs text-[#0A192F] bg-stone-100 px-2 py-0.5 rounded">
+                                    {b.voucherCode}
+                                  </span>
+                                  {b.isStudent && (
+                                    <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded flex items-center gap-1">
+                                      <GraduationCap className="w-3 h-3" />
+                                      Student
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="font-black text-sm text-[#0A192F]">
+                                  {b.guestName}
+                                </div>
+                                <div className="text-[11px] text-stone-500">
+                                  {b.guestPhone} • {b.guestEmail}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* 2. Schedule Slot */}
+                            <td className="py-4 px-4 lg:px-6">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-1.5 font-bold text-xs">
+                                  <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
+                                  <span>{b.arrivalDate}</span>
+                                  {isToday && (
+                                    <span className="text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">
+                                      Today
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs text-stone-600 font-mono">
+                                  <Clock className="w-3.5 h-3.5 text-stone-400" />
+                                  <span>{b.arrivalTime} &rarr; {b.departureTime}</span>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* 3. Zone & Duration */}
+                            <td className="py-4 px-4 lg:px-6">
+                              <div className="space-y-1">
+                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-stone-100 text-[#0A192F] inline-block">
+                                  {b.environment.replace("The ", "")}
+                                </span>
+                                <div className="text-xs text-stone-600 font-medium truncate max-w-[180px]">
+                                  {b.duration}
+                                </div>
+                                {b.addons !== "Nope, just standard ergonomic seating" && (
+                                  <div className="text-[10px] text-amber-800 font-bold flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                                    <span>{b.addons.replace("The ", "")}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* 4. Rate & Fee */}
+                            <td className="py-4 px-4 lg:px-6">
+                              <div className="space-y-0.5">
+                                <div className="font-black text-sm text-[#0A192F]">
+                                  {b.recommendedPrice}
+                                </div>
+                                <div className="text-[11px] text-stone-500">
+                                  {b.recommendedTitle}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* 5. Status Badge & Quick Toggle */}
+                            <td className="py-4 px-4 lg:px-6">
+                              <select
+                                value={b.status}
+                                onChange={(e) =>
+                                  handleStatusChange(b.id, e.target.value as BookingRecord["status"])
+                                }
+                                className={`text-xs font-black px-3 py-1.5 rounded-xl border-none cursor-pointer focus:outline-none shadow-2xs ${
+                                  b.status === "Checked In"
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : b.status === "Confirmed"
+                                    ? "bg-blue-100 text-blue-900"
+                                    : b.status === "Completed"
+                                    ? "bg-stone-200 text-stone-700"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Checked In">Checked In</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                              </select>
+                            </td>
+
+                            {/* 6. Actions */}
+                            <td className="py-4 px-4 lg:px-6 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                {/* Inspect Branded Pass QR */}
+                                <button
+                                  onClick={() => setInspectingBooking(b)}
+                                  className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-[#0A192F] text-stone-700 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                                  title="Inspect Branded Pass QR code & details"
+                                >
+                                  <QrCode className="w-4 h-4" />
+                                </button>
+
+                                {/* Delete */}
+                                <button
+                                  onClick={() => handleDelete(b.id)}
+                                  className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-red-50 text-stone-400 hover:text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                                  title="Delete reservation"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="bg-stone-50 px-4 lg:px-6 py-3 border-t border-stone-200/80 flex items-center justify-between text-xs text-stone-500">
+                <span>Showing {filteredBookings.length} of {bookings.length} reservations</span>
+                <span className="font-semibold">Local Storage Persistence Active</span>
+              </div>
             </div>
           </div>
         ) : (
           /* ======================================================== */
           /* TIMELINE VIEW: HOURLY PHASES & BOOKED SLOTS              */
           /* ======================================================== */
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {["Morning (08:00 AM – 11:30 AM)", "Afternoon (12:00 PM – 04:30 PM)", "Evening (05:00 PM – 08:30 PM)"].map(
               (phaseTitle, idx) => {
                 const phaseKey = idx === 0 ? "morning" : idx === 1 ? "afternoon" : "evening";
@@ -707,39 +855,39 @@ export default function AdminCrmDashboardPage() {
                 return (
                   <div
                     key={phaseTitle}
-                    className="bg-white rounded-3xl p-6 border border-stone-200/80 shadow-xs space-y-4"
+                    className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-stone-200/80 shadow-xs space-y-3 sm:space-y-4"
                   >
                     <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-[#0A192F] text-[#D4AF37] flex items-center justify-center font-black text-xs">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#0A192F] text-[#D4AF37] flex items-center justify-center font-black text-xs">
                           {idx + 1}
                         </div>
                         <div>
-                          <h3 className="font-black text-base text-[#0A192F]">
+                          <h3 className="font-black text-sm sm:text-base text-[#0A192F]">
                             {phaseTitle}
                           </h3>
-                          <p className="text-xs text-stone-400 font-medium">
+                          <p className="text-[11px] sm:text-xs text-stone-400 font-medium">
                             {phaseBookings.length} active reservations scheduled
                           </p>
                         </div>
                       </div>
 
-                      <span className="text-[11px] font-bold text-stone-500 bg-stone-100 px-3 py-1 rounded-full">
+                      <span className="text-[11px] font-bold text-stone-500 bg-stone-100 px-2.5 sm:px-3 py-1 rounded-full">
                         {phaseBookings.length} Guests
                       </span>
                     </div>
 
                     {phaseBookings.length === 0 ? (
-                      <p className="text-xs text-stone-400 py-4 italic">
+                      <p className="text-xs text-stone-400 py-3 italic">
                         No scheduled bookings in this time phase.
                       </p>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {phaseBookings.map((b) => (
                           <div
                             key={b.id}
                             onClick={() => setInspectingBooking(b)}
-                            className="p-4 rounded-2xl bg-stone-50/80 hover:bg-stone-100/90 border border-stone-200/60 transition-all cursor-pointer space-y-2 group"
+                            className="p-3.5 sm:p-4 rounded-2xl bg-stone-50/80 hover:bg-stone-100/90 border border-stone-200/60 transition-all cursor-pointer space-y-2 group"
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-mono font-bold text-xs text-[#0A192F] flex items-center gap-1.5">
@@ -786,84 +934,105 @@ export default function AdminCrmDashboardPage() {
         )}
       </main>
 
-      {/* 5. INSPECT QR CODE MODAL */}
+      {/* 5. INSPECT BRANDED QR CODE MODAL - WITH EMBEDDED FNJ MONOGRAM, DATE & TIME */}
       {inspectingBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div
             onClick={() => setInspectingBooking(null)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-md"
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
             aria-hidden="true"
           />
 
-          <div className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-5 shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-white rounded-3xl p-5 sm:p-7 max-w-md w-full space-y-4 shadow-2xl z-10 max-h-[92dvh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200 my-auto">
             <button
               onClick={() => setInspectingBooking(null)}
               className="absolute top-4 right-4 w-9 h-9 min-w-[44px] min-h-[44px] rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Close inspection dialog"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="text-center pt-2 space-y-1">
+            <div className="text-center pt-1 space-y-1">
               <span className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37] bg-[#0A192F] px-3 py-1 rounded-full inline-block">
-                Albay Check-In Scanner Pass
+                ★ FNJ Branded Pass QR ★
               </span>
-              <h3 className="text-xl font-black text-[#0A192F] pt-1">
+              <h3 className="text-lg sm:text-xl font-black text-[#0A192F] pt-1">
                 {inspectingBooking.guestName}
               </h3>
-              <p className="font-mono text-xs font-bold text-stone-500">
-                {inspectingBooking.voucherCode} • {inspectingBooking.arrivalDate}
-              </p>
+              <div className="flex items-center justify-center gap-2">
+                <span className="font-mono text-xs font-bold text-stone-500">
+                  {inspectingBooking.voucherCode}
+                </span>
+                <button
+                  onClick={() => handleCopyVoucher(inspectingBooking.voucherCode)}
+                  className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 hover:text-[#0A192F] font-bold cursor-pointer flex items-center gap-1"
+                >
+                  {isCopiedVoucher ? (
+                    <span className="text-emerald-700">Copied!</span>
+                  ) : (
+                    <React.Fragment>
+                      <Copy className="w-3 h-3" />
+                      <span>Copy</span>
+                    </React.Fragment>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* QR Render */}
-            <div className="w-52 h-52 mx-auto bg-white p-3 rounded-2xl border-2 border-[#D4AF37] shadow-inner flex items-center justify-center">
+            {/* Branded Pass Display (Full Badge with Center Logo, Date, and Time) */}
+            <div className="w-56 sm:w-64 max-w-full aspect-[460/620] mx-auto bg-white p-1 rounded-2xl border-2 border-[#D4AF37] shadow-lg flex items-center justify-center overflow-hidden">
               {inspectingQrDataUrl ? (
                 <img
                   src={inspectingQrDataUrl}
-                  alt={`QR for ${inspectingBooking.voucherCode}`}
-                  className="w-full h-full object-contain"
+                  alt={`Branded QR Pass for ${inspectingBooking.voucherCode}`}
+                  className="w-full h-full object-contain rounded-xl"
                 />
               ) : (
-                <div className="w-full h-full bg-stone-100 animate-pulse rounded-lg" />
+                <div className="w-full h-full bg-stone-100 animate-pulse rounded-lg flex items-center justify-center text-xs text-stone-400">
+                  Generating FNJ Pass...
+                </div>
               )}
             </div>
 
             {/* Breakdown Details */}
-            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 text-xs space-y-2">
-              <div className="flex justify-between">
-                <span className="text-stone-500 font-semibold">Scheduled Slot:</span>
-                <span className="font-bold text-[#0A192F]">
-                  {inspectingBooking.arrivalTime} – {inspectingBooking.departureTime}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-stone-50 border border-stone-200 text-xs space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="text-stone-500 font-semibold">Scheduled Date:</span>
+                <span className="font-bold text-[#0A192F] flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>{inspectingBooking.arrivalDate}</span>
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-stone-500 font-semibold">Assigned Plan:</span>
-                <span className="font-bold text-[#0A192F]">
+              <div className="flex justify-between items-center">
+                <span className="text-stone-500 font-semibold">Scheduled Time:</span>
+                <span className="font-bold text-[#0A192F] flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>{inspectingBooking.arrivalTime} – {inspectingBooking.departureTime}</span>
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-stone-500 font-semibold">Workspace Plan:</span>
+                <span className="font-bold text-[#0A192F] truncate max-w-[200px]">
                   {inspectingBooking.recommendedTitle}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-stone-500 font-semibold">Workspace Zone:</span>
-                <span className="font-bold text-[#0A192F]">
+              <div className="flex justify-between items-center">
+                <span className="text-stone-500 font-semibold">Assigned Zone:</span>
+                <span className="font-bold text-[#0A192F] truncate max-w-[200px]">
                   {inspectingBooking.environment}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-stone-500 font-semibold">Specialized Add-on:</span>
-                <span className="font-bold text-[#0A192F]">
-                  {inspectingBooking.addons}
-                </span>
-              </div>
-              <div className="flex justify-between pt-1 border-t border-stone-200">
-                <span className="text-stone-500 font-semibold">Total Fee:</span>
+              <div className="flex justify-between items-center pt-1 border-t border-stone-200">
+                <span className="text-stone-500 font-semibold">Mockup Fee:</span>
                 <span className="font-black text-sm text-[#0A192F]">
                   {inspectingBooking.recommendedPrice}
                 </span>
               </div>
             </div>
 
-            {/* Status Change Buttons */}
-            <div className="flex gap-2">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 pt-1">
+              {/* Check-In / Status toggle */}
               <button
                 onClick={() => {
                   handleStatusChange(inspectingBooking.id, "Checked In");
@@ -874,6 +1043,17 @@ export default function AdminCrmDashboardPage() {
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Mark Checked In</span>
               </button>
+
+              {/* Download Branded Pass */}
+              <button
+                onClick={handleDownloadInspectedQr}
+                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#0A192F] hover:bg-blue-900 text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                title="Download pass badge with date, time & FNJ logo"
+              >
+                <Download className="w-4 h-4 text-[#D4AF37]" />
+                <span>Download Pass</span>
+              </button>
+
               <button
                 onClick={() => setInspectingBooking(null)}
                 className="min-h-[44px] px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition-colors cursor-pointer"
@@ -885,19 +1065,20 @@ export default function AdminCrmDashboardPage() {
         </div>
       )}
 
-      {/* 6. REGISTER MANUAL WALK-IN DIALOG */}
+      {/* 6. REGISTER MANUAL WALK-IN DIALOG - 100% RESPONSIVE */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div
             onClick={() => setIsAddModalOpen(false)}
-            className="fixed inset-0 bg-black/70 backdrop-blur-md"
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
             aria-hidden="true"
           />
 
-          <div className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl z-10 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-white rounded-3xl p-5 sm:p-7 max-w-lg w-full space-y-4 shadow-2xl z-10 max-h-[92dvh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200 my-auto">
             <button
               onClick={() => setIsAddModalOpen(false)}
               className="absolute top-4 right-4 w-9 h-9 min-w-[44px] min-h-[44px] rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Close dialog"
             >
               <X className="w-5 h-5" />
             </button>
@@ -906,7 +1087,7 @@ export default function AdminCrmDashboardPage() {
               <span className="text-[10px] font-black uppercase text-[#D4AF37] bg-[#0A192F] px-3 py-1 rounded-full inline-block">
                 Reception Fast-Track
               </span>
-              <h3 className="text-xl font-black text-[#0A192F] mt-2">
+              <h3 className="text-lg sm:text-xl font-black text-[#0A192F] mt-2">
                 Register Manual Walk-In Guest
               </h3>
               <p className="text-xs text-stone-500">
@@ -914,7 +1095,7 @@ export default function AdminCrmDashboardPage() {
               </p>
             </div>
 
-            <form onSubmit={handleCreateWalkin} className="space-y-4">
+            <form onSubmit={handleCreateWalkin} className="space-y-3.5">
               <div>
                 <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
                   Guest Full Name
@@ -929,7 +1110,7 @@ export default function AdminCrmDashboardPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
                     Contact Phone
@@ -956,7 +1137,7 @@ export default function AdminCrmDashboardPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
                     Arrival Time Slot
@@ -1020,17 +1201,17 @@ export default function AdminCrmDashboardPage() {
                 </label>
               </div>
 
-              <div className="pt-3 flex gap-2">
+              <div className="pt-2 flex flex-col sm:flex-row gap-2">
                 <button
                   type="submit"
-                  className="flex-1 min-h-[46px] py-3 rounded-xl bg-[#0A192F] text-white font-black text-xs uppercase tracking-wider hover:bg-blue-900 transition-colors cursor-pointer shadow-xs"
+                  className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-[#0A192F] text-white font-black text-xs uppercase tracking-wider hover:bg-blue-900 transition-colors cursor-pointer shadow-xs"
                 >
                   Confirm & Check-In Walk-In
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="min-h-[46px] px-5 py-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition-colors cursor-pointer"
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>

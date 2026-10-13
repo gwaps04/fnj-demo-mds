@@ -40,6 +40,7 @@ import {
   calculateDepartureTime,
   BookingRecord,
 } from "@/lib/bookings";
+import { generateBrandedQrDataUrl } from "@/lib/brandedQr";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -144,19 +145,21 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
         status: "RESERVED - LIVE MOCKUP",
       });
 
-      QRCode.toDataURL(passPayload, {
-        width: 380,
-        margin: 2,
-        color: {
-          dark: "#0A192F",
-          light: "#FFFFFF",
-        },
+      generateBrandedQrDataUrl({
+        payloadText: passPayload,
+        voucherCode,
+        guestName: guestName || "Valued Albayan Guest",
+        arrivalDate: selectedDate,
+        arrivalTime: selectedTime,
+        departureTime: calculatedDeparture,
+        zoneOrPlan: recommendedTitle,
+        rateCategory: isStudent.startsWith("Yes") ? "Student Verified Rate" : "Regular Workspace Rate",
       })
         .then((url) => {
           setQrDataUrl(url);
         })
         .catch((err) => {
-          console.error("QR Code generation error:", err);
+          console.error("Branded QR Code generation error:", err);
         });
     }
   }, [
@@ -1029,12 +1032,12 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-sm flex flex-col sm:flex-row items-center gap-5">
                       {/* Left: Rendered High-Definition QR Code */}
                       <div className="relative group shrink-0">
-                        <div className="w-36 h-36 bg-white p-2 rounded-2xl border-2 border-stone-100 shadow-sm flex items-center justify-center overflow-hidden">
+                        <div className="w-36 sm:w-40 aspect-[460/620] bg-white p-1 rounded-2xl border border-stone-200 shadow-sm flex items-center justify-center overflow-hidden">
                           {qrDataUrl ? (
                             <img
                               src={qrDataUrl}
                               alt={`Pass QR Code for ${voucherCode}`}
-                              className="w-full h-full object-contain"
+                              className="w-full h-full object-contain rounded-xl"
                             />
                           ) : (
                             <div className="w-full h-full bg-stone-100 animate-pulse rounded-lg" />
@@ -1179,7 +1182,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
             aria-hidden="true"
           />
 
-          <div className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-white rounded-3xl p-5 sm:p-7 max-w-md w-full text-center space-y-4 shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-200">
             <button
               onClick={() => setShowQrViewer(false)}
               className="absolute top-4 right-4 w-9 h-9 min-w-[44px] min-h-[44px] rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center transition-colors cursor-pointer"
@@ -1192,24 +1195,24 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
               <span className="text-[10px] font-black uppercase text-[#D4AF37] tracking-widest bg-[#0A192F] px-3 py-1 rounded-full inline-block">
                 Digital Pass QR
               </span>
-              <h4 className="text-lg font-black text-[#0A192F] mt-2">
+              <h4 className="text-lg font-black text-[#0A192F] mt-1.5">
                 {guestName || "FNJ Coworking Guest"}
               </h4>
               <p className="font-mono text-xs text-[#0A192F]/60 font-bold">
                 {voucherCode}
               </p>
-              <p className="text-xs text-stone-500 font-semibold mt-1">
+              <p className="text-xs text-stone-500 font-semibold mt-0.5">
                 {selectedDate} • {selectedTime} – {calculatedDeparture}
               </p>
             </div>
 
-            {/* High-Resolution QR Display */}
-            <div className="w-56 h-56 mx-auto bg-white p-3 rounded-2xl border-2 border-[#D4AF37] shadow-inner flex items-center justify-center">
+            {/* High-Resolution Branded Pass Display */}
+            <div className="w-64 max-w-full aspect-[460/620] mx-auto bg-white p-1 rounded-2xl border-2 border-[#D4AF37] shadow-lg flex items-center justify-center overflow-hidden">
               {qrDataUrl ? (
                 <img
                   src={qrDataUrl}
                   alt={`Pass QR Code for ${voucherCode}`}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain rounded-xl"
                 />
               ) : (
                 <div className="w-full h-full bg-stone-100 animate-pulse rounded-lg" />
