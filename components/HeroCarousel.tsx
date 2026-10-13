@@ -82,7 +82,7 @@ export function HeroCarousel({ onOpenBooking }: HeroCarouselProps) {
   }, [isPlaying, nextSlide]);
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#F5F5DC] border-b-4 border-[#0A192F]">
+    <section className="relative w-full overflow-hidden bg-[#F5F5DC]">
       {/* Full-width Carousel Frame */}
       <div className="relative w-full min-h-[560px] sm:min-h-[640px] lg:min-h-[700px] flex items-center justify-center">
         {/* Animated Slide Background */}
