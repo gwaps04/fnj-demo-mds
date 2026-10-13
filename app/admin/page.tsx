@@ -3,6 +3,7 @@
 // FILE: app/admin/page.tsx
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Calendar,
   Clock,
@@ -473,10 +474,17 @@ export default function AdminCrmDashboardPage() {
             <div className="flex items-center gap-3">
               <Link
                 href="/"
-                className="w-10 h-10 min-w-[40px] rounded-xl bg-[#0A192F] text-[#D4AF37] font-black text-sm flex items-center justify-center shadow-xs hover:scale-105 transition-transform"
+                className="w-10 h-10 min-w-[40px] rounded-xl bg-[#0A192F] p-1 flex items-center justify-center shadow-xs hover:scale-105 transition-transform overflow-hidden border border-[#D4AF37]/30 shrink-0"
                 title="Return to Public Website"
               >
-                FNJ
+                <Image
+                  src="/fnj-logo.png"
+                  alt="FNJ Logo"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </Link>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">

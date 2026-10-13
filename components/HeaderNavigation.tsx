@@ -3,6 +3,7 @@
 // FILE: components/HeaderNavigation.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Menu,
   X,
@@ -132,11 +133,17 @@ export function HeaderNavigation({ onOpenBooking }: HeaderNavigationProps) {
           className="flex items-center gap-2.5 sm:gap-3.5 group shrink-0 min-w-0"
           aria-label="FNJ Coworking Space Rental Home"
         >
-          {/* Logo Badge */}
-          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#0A192F] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300 shrink-0">
-            <span className="font-black text-base sm:text-lg tracking-wider text-[#D4AF37]">
-              FNJ
-            </span>
+          {/* Logo Badge with Official FNJ Logo */}
+          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#0A192F] p-1 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300 shrink-0 overflow-hidden border border-[#D4AF37]/30">
+            <Image
+              src="/fnj-logo.png"
+              alt="FNJ Coworking & Pickleball Logo"
+              width={44}
+              height={44}
+              priority
+              className="w-full h-full object-contain"
+              referrerPolicy="no-referrer"
+            />
           </div>
 
           {/* Brand Typography with Fluid Responsive Sizing */}
@@ -253,8 +260,15 @@ export function HeaderNavigation({ onOpenBooking }: HeaderNavigationProps) {
             {/* Drawer Header with Logo & Close Button */}
             <div className="h-18 sm:h-20 px-6 flex items-center justify-between border-b border-stone-100 bg-[#F5F5DC]/40 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#0A192F] flex items-center justify-center text-[#D4AF37] font-black text-sm">
-                  FNJ
+                <div className="w-10 h-10 rounded-xl bg-[#0A192F] p-1 flex items-center justify-center shadow-xs shrink-0 overflow-hidden border border-[#D4AF37]/30">
+                  <Image
+                    src="/fnj-logo.png"
+                    alt="FNJ Coworking Logo"
+                    width={40}
+                    height={40}
+                    className="w-full h-full object-contain"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 <div>
                   <h3 className="font-black text-sm text-[#0A192F] uppercase">

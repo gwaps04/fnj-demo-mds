@@ -3,6 +3,7 @@
 // FILE: components/BookingModal.tsx
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import QRCode from "qrcode";
 import {
   X,
@@ -396,8 +397,15 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
         {/* Header Bar */}
         <div className="bg-[#0A192F] text-white px-6 sm:px-8 py-4 sm:py-5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#D4AF37] flex items-center justify-center text-[#0A192F] font-black text-sm">
-              FNJ
+            <div className="w-9 h-9 rounded-xl bg-[#0A192F] p-1 flex items-center justify-center shadow-xs overflow-hidden border border-[#D4AF37]/40 shrink-0">
+              <Image
+                src="/fnj-logo.png"
+                alt="FNJ Logo"
+                width={36}
+                height={36}
+                className="w-full h-full object-contain"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
               <h3 className="font-black text-sm sm:text-base tracking-tight text-white uppercase">

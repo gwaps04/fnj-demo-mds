@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   MapPin,
   Clock,
@@ -39,8 +40,15 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
           {/* Left Column: Brand & Exact Address */}
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#112442] flex items-center justify-center font-black text-xl text-[#D4AF37] shadow-sm">
-                FNJ
+              <div className="w-12 h-12 rounded-2xl bg-[#0A192F] p-1.5 flex items-center justify-center shadow-sm overflow-hidden border border-[#D4AF37]/30 shrink-0">
+                <Image
+                  src="/fnj-logo.png"
+                  alt="FNJ Coworking Logo"
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <div>
                 <h3 className="text-xl font-black text-white tracking-tight uppercase">
