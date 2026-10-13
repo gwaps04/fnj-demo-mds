@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Trophy, CheckCircle2, ArrowRight, Clock } from "lucide-react";
 
 interface SpecialAttractionPickleballProps {
@@ -79,39 +80,39 @@ export function SpecialAttractionPickleball({
               </div>
             </div>
 
-            {/* Right Column: Large Action Shot Placeholder (Borderless, Soft Shadow) */}
+            {/* Right Column: Actual 3rd Floor Pickleball Court Photo */}
             <div className="lg:col-span-5">
-              {/* 
-                ========================================================================
-                [IMAGE PLACEHOLDER: PICKLEBALL ACTION SHOT]
-                Swap with your local asset: e.g. /public/pickleball-action.jpg
-                ========================================================================
-              */}
-              <div className="relative rounded-3xl overflow-hidden shadow-md bg-stone-300 min-h-[340px] sm:min-h-[400px] flex flex-col items-center justify-center p-8 text-center group">
-                {/* Subtle animated pattern */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-stone-400 via-stone-300 to-stone-200" />
+              <div className="relative rounded-3xl overflow-hidden shadow-xl bg-stone-900 min-h-[340px] sm:min-h-[420px] h-full flex flex-col justify-end p-6 sm:p-8 group">
+                {/* Optimized Next.js Image of 3rd Floor Pickleball Court */}
+                <Image
+                  src="/hero7.jpg"
+                  alt="FNJ 3rd Floor Indoor Pickleball Court in Tagas, Daraga, Albay"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                  referrerPolicy="no-referrer"
+                />
 
-                <div className="relative z-10 max-w-xs p-6 rounded-2xl bg-[#0A192F]/92 backdrop-blur-md text-center space-y-3 shadow-lg">
-                  <div className="w-14 h-14 rounded-2xl bg-[#D4AF37] text-[#0A192F] flex items-center justify-center mx-auto shadow-sm">
-                    <Trophy className="w-7 h-7" />
+                {/* Legibility Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0A192F]/95 via-[#0A192F]/30 to-transparent pointer-events-none" />
+
+                {/* Overlaid Information Badge & Caption */}
+                <div className="relative z-10 space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37] text-[#0A192F] text-[10px] font-black uppercase tracking-wider shadow-sm">
+                    <Trophy className="w-3 h-3 fill-[#0A192F]" />
+                    3rd Floor Indoor Court
                   </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-black tracking-widest text-[#D4AF37] block">
-                      Target Asset Location
-                    </span>
-                    <h4 className="text-sm font-black text-white mt-0.5">/public/pickleball-action.jpg</h4>
-                    <p className="text-[11px] text-stone-300 mt-1.5 leading-relaxed font-normal">
-                      Action shot: Players rallying, dinking at the kitchen line, or smiling on the 3rd floor court.
-                    </p>
-                  </div>
-                  <span className="inline-block text-[10px] font-mono px-2.5 py-1 rounded bg-black/40 text-stone-300">
-                    Aspect Ratio: 4:3 or 16:9
-                  </span>
+                  <h4 className="text-base sm:text-lg font-black text-white leading-tight">
+                    Tournament-Marked Indoor Facility
+                  </h4>
+                  <p className="text-xs text-stone-300 leading-relaxed font-normal">
+                    Rain-or-shine air ventilation, cushioned flooring, and night LED floodlights above the coworking space.
+                  </p>
                 </div>
 
-                {/* Overlaid Pill Badge */}
-                <div className="absolute top-4 right-4 z-20 px-3.5 py-1 rounded-full bg-[#0A192F] text-[#D4AF37] text-[10px] font-black uppercase tracking-wider shadow-sm">
-                  Level 3 Court
+                {/* Overlaid Corner Badge */}
+                <div className="absolute top-4 right-4 z-20 px-3.5 py-1 rounded-full bg-[#0A192F]/90 backdrop-blur-md text-[#D4AF37] text-[10px] font-black uppercase tracking-wider shadow-sm border border-[#D4AF37]/30">
+                  Level 3 Sports
                 </div>
               </div>
             </div>

@@ -10,6 +10,7 @@ import {
   Sparkles,
   ArrowRight,
   Star,
+  ArrowLeftRight,
 } from "lucide-react";
 
 interface RatesSectionProps {
@@ -203,8 +204,20 @@ export function RatesSection({ onOpenBooking }: RatesSectionProps) {
             <span className="text-xs text-[#D4AF37] font-bold">Albay Best Value</span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
+          {/* Interactive Horizontal Scroll Guide Banner */}
+          <div className="flex items-center justify-between px-6 sm:px-8 py-2.5 bg-[#F5F5DC]/90 border-b border-stone-200/80 text-xs text-[#0A192F]">
+            <div className="flex items-center gap-2 font-bold">
+              <ArrowLeftRight className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span>Horizontal Scroll View: Compare all durations & amenities</span>
+            </div>
+            <span className="text-[11px] font-black uppercase tracking-wider text-[#0A192F]/60 flex items-center gap-1">
+              <span>Scroll horizontally</span>
+              <span className="text-[#D4AF37]">&rarr;</span>
+            </span>
+          </div>
+
+          <div className="overflow-x-auto custom-horizontal-scrollbar pb-3">
+            <table className="w-full text-left text-xs sm:text-sm min-w-[640px]">
               <thead className="bg-[#F5F5DC]/60 text-[#0A192F] font-bold">
                 <tr>
                   <th className="py-4 px-6 sm:px-8">Duration Tier</th>
