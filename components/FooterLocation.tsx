@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   MapPin,
   Clock,
@@ -185,17 +186,22 @@ export function FooterLocation({ onOpenBooking }: FooterLocationProps) {
           </div>
         </div>
 
-        {/* Bottom Copyright */}
+        {/* Bottom Copyright & Admin CRM Portal */}
         <div className="pt-10 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
           <div>
             © {new Date().getFullYear()} FNJ Coworking Space Rental & Pickleball Club. All rights reserved.
           </div>
-          <div className="flex items-center gap-2 text-[11px]">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-[11px]">
             <span className="text-[#D4AF37] font-semibold">
               Tagas, Daraga, Albay, Philippines
             </span>
             <span>•</span>
-            <span>Minimalist & Elegant Experience</span>
+            <Link
+              href="/admin"
+              className="text-stone-300 hover:text-[#D4AF37] font-bold underline underline-offset-4 transition-colors"
+            >
+              Admin CRM Portal &rarr;
+            </Link>
           </div>
         </div>
       </div>

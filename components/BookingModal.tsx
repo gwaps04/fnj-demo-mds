@@ -1,7 +1,8 @@
 "use client";
 
 // FILE: components/BookingModal.tsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import QRCode from "qrcode";
 import {
   X,
@@ -31,7 +32,14 @@ import {
   Calendar,
   Share2,
   Copy,
+  LayoutDashboard,
 } from "lucide-react";
+import { TimeSlotPicker } from "@/components/TimeSlotPicker";
+import {
+  saveBooking,
+  calculateDepartureTime,
+  BookingRecord,
+} from "@/lib/bookings";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -39,7 +47,7 @@ interface BookingModalProps {
 }
 
 export function BookingModal({ isOpen, onClose }: BookingModalProps) {
-  // Wizard Step: 1 through 5 for questions, 6 for Final Recommendation & Guest Details
+  // Wizard Step: 1 through 5 for questions, 6 for Final Recommendation, Time Selection & Guest Details
   const [currentStep, setCurrentStep] = useState<number>(1);
 
   // Question 1 (Checkbox / Multi-select): Main goal
@@ -67,46 +75,73 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
     "Nope, just standard ergonomic seating"
   );
 
+  // Time & Date Selection state
+  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
+  const [selectedTime, setSelectedTime] = useState<string>("09:00 AM");
+
   // Guest Contact Information
   const [guestName, setGuestName] = useState<string>("");
   const [guestEmail, setGuestEmail] = useState<string>("");
   const [guestPhone, setGuestPhone] = useState<string>("");
   const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
   const [voucherCode, setVoucherCode] = useState<string>("FNJ-PASS-7391");
-  const [reservationTimestamp, setReservationTimestamp] = useState<string>("");
+  const [confirmedBookingId, setConfirmedBookingId] = useState<string>("");
 
   // QR Code Data URL state
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [showQrViewer, setShowQrViewer] = useState<boolean>(false);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
 
-  // Initialize timestamp once open
-  useEffect(() => {
-    if (isOpen && !reservationTimestamp) {
-      const now = new Date();
-      setReservationTimestamp(
-        now.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }) + " • Same-Day Pass"
-      );
-    }
-  }, [isOpen, reservationTimestamp]);
+  // Derive customized match recommendation
+  const isStudentRate = isStudent.startsWith("Yes");
+  let recommendedTitle = "8-Hour Coworking Day Pass";
+  let recommendedPrice = isStudentRate ? "₱550.00" : "₱650.00";
+  let recommendedNumericPrice = isStudentRate ? 550 : 650;
+  let recommendedRateLabel = isStudentRate ? "Student Discount Rate" : "Regular Professional Rate";
+
+  if (duration.includes("Monthly Subscription")) {
+    recommendedTitle = "1 Month Dedicated Subscription";
+    recommendedPrice = "₱9,000.00";
+    recommendedNumericPrice = 9000;
+    recommendedRateLabel = "All-Inclusive Resident Membership";
+  } else if (addons.includes("Conference Room")) {
+    recommendedTitle = "Executive Conference Room (1-10 Pax)";
+    recommendedPrice = "₱700.00 / Hour";
+    recommendedNumericPrice = 700;
+    recommendedRateLabel = "Private Boardroom Rate";
+  } else if (duration.includes("1-hour")) {
+    recommendedTitle = "1-Hour Quick Sprint Pass";
+    recommendedPrice = isStudentRate ? "₱80.00" : "₱100.00";
+    recommendedNumericPrice = isStudentRate ? 80 : 100;
+  } else if (duration.includes("3-to-5 hour")) {
+    recommendedTitle = "5-Hour Extended Focus Pass";
+    recommendedPrice = isStudentRate ? "₱380.00" : "₱480.00";
+    recommendedNumericPrice = isStudentRate ? 380 : 480;
+  }
+
+  // Calculated departure time
+  const calculatedDeparture = useMemo(() => {
+    return calculateDepartureTime(selectedTime, duration);
+  }, [selectedTime, duration]);
 
   // Generate QR Code data URL when confirmed or voucher generated
   useEffect(() => {
     if (voucherCode) {
       const passPayload = JSON.stringify({
         venue: "FNJ Coworking Space & Pickleball",
-        location: "2F Biak Realty Corp., Lakandula Dr., Daraga, Albay",
+        address: "2F Biak Realty Corp., Lakandula Dr., Daraga, Albay",
         voucher: voucherCode,
         holder: guestName || "FNJ Valued Guest",
         email: guestEmail || "guest@fnjcoworking.ph",
-        tier: duration,
-        studentRate: isStudent.startsWith("Yes"),
+        phone: guestPhone || "09XX-XXX-XXXX",
+        date: selectedDate,
+        arrival: selectedTime,
+        departure: calculatedDeparture,
+        plan: recommendedTitle,
+        rate: recommendedPrice,
         facility: addons,
-        status: "RESERVED - MOCKUP ACTIVE",
+        status: "RESERVED - LIVE MOCKUP",
       });
 
       QRCode.toDataURL(passPayload, {
@@ -124,7 +159,18 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
           console.error("QR Code generation error:", err);
         });
     }
-  }, [voucherCode, guestName, guestEmail, duration, isStudent, addons]);
+  }, [
+    voucherCode,
+    guestName,
+    guestEmail,
+    guestPhone,
+    selectedDate,
+    selectedTime,
+    calculatedDeparture,
+    recommendedTitle,
+    recommendedPrice,
+    addons,
+  ]);
 
   if (!isOpen) return null;
 
@@ -257,28 +303,6 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
     }
   };
 
-  // Derive customized match recommendation
-  const isStudentRate = isStudent.startsWith("Yes");
-  let recommendedTitle = "8-Hour Coworking Day Pass";
-  let recommendedPrice = isStudentRate ? "₱550.00" : "₱650.00";
-  let recommendedRateLabel = isStudentRate ? "Student Discount Rate" : "Regular Professional Rate";
-
-  if (duration.includes("Monthly Subscription")) {
-    recommendedTitle = "1 Month Dedicated Subscription";
-    recommendedPrice = "₱9,000.00";
-    recommendedRateLabel = "All-Inclusive Resident Membership";
-  } else if (addons.includes("Conference Room")) {
-    recommendedTitle = "Executive Conference Room (1-10 Pax)";
-    recommendedPrice = "₱700.00 / Hour";
-    recommendedRateLabel = "Private Boardroom Rate";
-  } else if (duration.includes("1-hour")) {
-    recommendedTitle = "1-Hour Quick Sprint Pass";
-    recommendedPrice = isStudentRate ? "₱80.00" : "₱100.00";
-  } else if (duration.includes("3-to-5 hour")) {
-    recommendedTitle = "5-Hour Extended Focus Pass";
-    recommendedPrice = isStudentRate ? "₱380.00" : "₱480.00";
-  }
-
   const handleNext = () => {
     if (currentStep < 5) {
       setCurrentStep((prev) => prev + 1);
@@ -304,8 +328,34 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
     setIsConfirmed(false);
   };
 
-  // Handle Generate Instant Mockup Pass Voucher
+  // Handle Generate Instant Mockup Pass Voucher with persistent localStorage write
   const handleGeneratePass = () => {
+    const bookingId = "fnj-" + Date.now();
+    setConfirmedBookingId(bookingId);
+
+    const newBooking: BookingRecord = {
+      id: bookingId,
+      voucherCode,
+      guestName: guestName.trim() || "Valued Albayan Guest",
+      guestEmail: guestEmail.trim() || "guest@fnjcoworking.ph",
+      guestPhone: guestPhone.trim() || "0917-123-4567",
+      goals,
+      environment,
+      duration,
+      arrivalDate: selectedDate,
+      arrivalTime: selectedTime,
+      departureTime: calculatedDeparture,
+      isStudent: isStudent.startsWith("Yes"),
+      addons,
+      recommendedTitle,
+      recommendedPrice,
+      totalPriceAmount: recommendedNumericPrice,
+      status: "Confirmed",
+      createdAt: new Date().toISOString(),
+    };
+
+    // Save to localStorage simulation
+    saveBooking(newBooking);
     setIsConfirmed(true);
   };
 
@@ -358,8 +408,8 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 {currentStep <= 5
                   ? `Question ${currentStep} of 5 Pre-Qualifying Steps`
                   : isConfirmed
-                  ? "Official Mockup QR Pass & Voucher"
-                  : "FNJ Mockup Reservation Voucher"}
+                  ? "Official Mockup QR Pass & Live CRM Sync"
+                  : "Pick Time Slot & Claim Voucher"}
               </p>
             </div>
           </div>
@@ -740,7 +790,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
           )}
 
           {/* ======================================================== */}
-          {/* STEP 6: RECOMMENDATION, CONTACT INPUT, OR RESERVATION    */}
+          {/* STEP 6: RECOMMENDATION, TIME PICKER & PERSISTENT PASS    */}
           {/* ======================================================== */}
           {currentStep === 6 && (
             <div className="space-y-6 animate-in fade-in duration-300">
@@ -761,9 +811,9 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </span>
                   </div>
 
-                  <div className="text-xs text-emerald-900 leading-relaxed space-y-1">
+                  <div className="text-xs text-emerald-900 leading-relaxed space-y-2">
                     <p className="font-medium">
-                      Thank you{guestName ? `, ${guestName}` : ""}! Your workstation mockup reservation is confirmed.
+                      Thank you{guestName ? `, ${guestName}` : ""}! Your workstation mockup reservation has been captured and synchronized to the Live Admin CRM.
                     </p>
                     <p className="bg-white/80 p-3 rounded-xl border border-emerald-200/60 flex items-start gap-2.5 text-emerald-900">
                       <Mail className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
@@ -772,9 +822,24 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                         <span className="font-mono font-bold underline text-emerald-950">
                           {guestEmail || "your provided email"}
                         </span>
-                        . Please check your inbox and present your pass upon arrival.
+                        . Please present this pass upon arrival in Daraga.
                       </span>
                     </p>
+                  </div>
+
+                  {/* Direct Link to Admin CRM */}
+                  <div className="pt-1 flex items-center justify-between">
+                    <span className="text-[11px] text-emerald-800 font-bold">
+                      Saved to live schedule database
+                    </span>
+                    <Link
+                      href="/admin"
+                      target="_blank"
+                      className="inline-flex items-center gap-1.5 text-xs font-black text-[#0A192F] bg-[#D4AF37] px-3.5 py-1.5 rounded-xl shadow-xs hover:bg-[#b8952b] transition-colors"
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5" />
+                      <span>View in Admin CRM &rarr;</span>
+                    </Link>
                   </div>
                 </div>
               )}
@@ -831,6 +896,30 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 </div>
               </div>
 
+              {/* TIME SLOT SELECTION COMPONENT (Before confirmation) */}
+              {!isConfirmed && (
+                <div className="p-6 rounded-3xl bg-white border border-stone-200/90 shadow-sm space-y-4">
+                  <div className="border-b border-stone-100 pb-3">
+                    <h5 className="font-black text-base text-[#0A192F] flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-[#D4AF37]" />
+                      <span>Select Arrival Time & Duration Slot</span>
+                    </h5>
+                    <p className="text-xs text-[#0A192F]/60 mt-0.5">
+                      Choose your arrival hour. Departure time calculates automatically based on your {duration.split(" ")[1] || "chosen"} session.
+                    </p>
+                  </div>
+
+                  {/* Interactive Time Picker (Phase-of-Day tabs + Tape + Smart Calculation) */}
+                  <TimeSlotPicker
+                    selectedTime={selectedTime}
+                    onSelectTime={setSelectedTime}
+                    selectedDate={selectedDate}
+                    onSelectDate={setSelectedDate}
+                    durationOption={duration}
+                  />
+                </div>
+              )}
+
               {/* DIGITAL PASS VOUCHER & QR CODE SECTION */}
               <div className="p-6 rounded-3xl bg-stone-50 border border-stone-200/80 space-y-5">
                 <div className="flex items-center justify-between pb-3 border-b border-stone-200">
@@ -869,7 +958,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                         : "text-[#0A192F] bg-[#D4AF37]/20"
                     }`}
                   >
-                    {isConfirmed ? "Confirmed ✓" : "Ready to Claim"}
+                    {isConfirmed ? "Live Sync Confirmed ✓" : "Ready to Claim"}
                   </span>
                 </div>
 
@@ -877,7 +966,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 {!isConfirmed ? (
                   <div className="space-y-4 pt-1">
                     <p className="text-xs text-[#0A192F]/75">
-                      Please enter your contact details to generate your official pass QR code and dispatch your reservation email confirmation.
+                      Please enter your contact details to generate your official pass QR code and synchronize your booking with the Admin CRM schedule.
                     </p>
 
                     <div className="grid sm:grid-cols-2 gap-3.5">
@@ -934,7 +1023,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                     </button>
                   </div>
                 ) : (
-                  /* POST-CONFIRMATION: QR CODE PASS CARD, DOWNLOAD BUTTON & VIEW QR CODE LINK */
+                  /* POST-CONFIRMATION: QR CODE PASS CARD, SCHEDULE BREAKDOWN, DOWNLOAD BUTTON & VIEW QR CODE LINK */
                   <div className="space-y-5">
                     {/* Visual QR Code Ticket Card */}
                     <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-sm flex flex-col sm:flex-row items-center gap-5">
@@ -962,11 +1051,11 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                         </button>
                       </div>
 
-                      {/* Right: Pass Details Breakdown */}
+                      {/* Right: Pass Details Breakdown & Schedule */}
                       <div className="flex-1 space-y-2 text-center sm:text-left">
                         <div className="space-y-0.5">
                           <span className="text-[10px] font-black uppercase text-[#D4AF37] tracking-wider">
-                            Pass Holder
+                            Pass Holder & Scheduled Slot
                           </span>
                           <h5 className="font-black text-sm sm:text-base text-[#0A192F]">
                             {guestName || "Registered Guest"}
@@ -976,9 +1065,15 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
                           </p>
                         </div>
 
+                        {/* Schedule Chips */}
                         <div className="pt-1.5 flex flex-wrap items-center gap-2 justify-center sm:justify-start text-[11px] text-[#0A192F]">
-                          <span className="px-2.5 py-1 rounded-md bg-stone-100 font-semibold">
-                            {recommendedTitle}
+                          <span className="px-2.5 py-1 rounded-md bg-stone-100 font-semibold flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-[#D4AF37]" />
+                            <span>{selectedDate}</span>
+                          </span>
+                          <span className="px-2.5 py-1 rounded-md bg-stone-100 font-semibold flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-[#D4AF37]" />
+                            <span>{selectedTime} – {calculatedDeparture}</span>
                           </span>
                           <span className="px-2.5 py-1 rounded-md bg-amber-50 text-amber-900 font-bold border border-amber-200">
                             {recommendedPrice}
@@ -1061,7 +1156,7 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
               onClick={handleNext}
               className="min-h-[44px] px-6 py-2.5 rounded-full bg-[#D4AF37] text-[#0A192F] font-black text-xs uppercase tracking-wider shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-[#b8952b] active:scale-95 flex items-center gap-2 cursor-pointer"
             >
-              <span>See My Recommended Pass</span>
+              <span>Pick Arrival Time & Pass</span>
               <Sparkles className="w-3.5 h-3.5 text-[#0A192F]" />
             </button>
           ) : (
@@ -1102,6 +1197,9 @@ export function BookingModal({ isOpen, onClose }: BookingModalProps) {
               </h4>
               <p className="font-mono text-xs text-[#0A192F]/60 font-bold">
                 {voucherCode}
+              </p>
+              <p className="text-xs text-stone-500 font-semibold mt-1">
+                {selectedDate} • {selectedTime} – {calculatedDeparture}
               </p>
             </div>
 

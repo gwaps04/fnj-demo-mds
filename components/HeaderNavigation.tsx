@@ -2,6 +2,7 @@
 
 // FILE: components/HeaderNavigation.tsx
 import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import {
   Menu,
   X,
@@ -14,6 +15,7 @@ import {
   Image as ImageIcon,
   Phone,
   ShieldCheck,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface HeaderNavigationProps {
@@ -162,6 +164,16 @@ export function HeaderNavigation({ onOpenBooking }: HeaderNavigationProps) {
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#D4AF37] group-hover:w-full transition-all duration-300 rounded-full" />
             </a>
           ))}
+
+          {/* Admin CRM Link */}
+          <Link
+            href="/admin"
+            className="px-3.5 py-2 rounded-full border border-[#0A192F]/20 text-[#0A192F] hover:bg-[#0A192F] hover:text-[#D4AF37] font-bold text-xs uppercase tracking-wider transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0"
+            title="Operations CRM Dashboard"
+          >
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            <span>Admin CRM</span>
+          </Link>
 
           {/* Desktop Tactile Book Now CTA Button */}
           <button
@@ -316,6 +328,15 @@ export function HeaderNavigation({ onOpenBooking }: HeaderNavigationProps) {
                   <span>Book Now</span>
                   <ArrowRight className="w-4 h-4 text-[#0A192F]" />
                 </button>
+
+                <Link
+                  href="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-2.5 rounded-xl border border-white/20 text-white font-bold text-xs uppercase tracking-wider hover:bg-white/10 transition-colors flex items-center justify-center gap-2 cursor-pointer mt-1"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Admin CRM Portal</span>
+                </Link>
               </div>
 
               {/* Quick Facility Guide Snippet at Bottom */}
