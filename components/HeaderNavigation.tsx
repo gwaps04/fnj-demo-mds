@@ -68,6 +68,12 @@ export function HeaderNavigation({ onOpenBooking }: HeaderNavigationProps) {
 
   const navLinks = [
     {
+      name: "Promos",
+      href: "#promos",
+      desc: "Live Deals & Bulletin",
+      icon: Sparkles,
+    },
+    {
       name: "Amenities",
       href: "#amenities",
       desc: "2nd Floor Facilities & Fiber",

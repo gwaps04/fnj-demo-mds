@@ -25,11 +25,14 @@ import {
   Sparkles,
   Phone,
   Mail,
-  SlidersHorizontal,
-  ChevronRight,
-  Eye,
-  Check,
   Copy,
+  Tag,
+  Megaphone,
+  Edit3,
+  Layers,
+  Check,
+  Eye,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   getBookings,
@@ -40,14 +43,24 @@ import {
   BookingRecord,
   calculateDepartureTime,
 } from "@/lib/bookings";
+import {
+  getPromos,
+  savePromo,
+  updatePromo,
+  deletePromo,
+  togglePromoStatus,
+  resetToSeedPromos,
+  PromoAnnouncement,
+} from "@/lib/promos";
 import { generateBrandedQrDataUrl } from "@/lib/brandedQr";
 
 export default function AdminCrmDashboardPage() {
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
+  const [promos, setPromos] = useState<PromoAnnouncement[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedZoneFilter, setSelectedZoneFilter] = useState<string>("All");
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>("all");
-  const [activeViewTab, setActiveViewTab] = useState<"table" | "timeline">("table");
+  const [activeViewTab, setActiveViewTab] = useState<"table" | "timeline" | "promos">("table");
 
   // Inspection modal for QR pass
   const [inspectingBooking, setInspectingBooking] = useState<BookingRecord | null>(null);
@@ -65,27 +78,50 @@ export default function AdminCrmDashboardPage() {
   const [walkinIsStudent, setWalkinIsStudent] = useState<boolean>(false);
   const [walkinAddon, setWalkinAddon] = useState<string>("Nope, just standard ergonomic seating");
 
+  // Promo Add / Edit Modal state
+  const [isPromoModalOpen, setIsPromoModalOpen] = useState<boolean>(false);
+  const [editingPromoId, setEditingPromoId] = useState<string | null>(null);
+  const [promoFormTitle, setPromoFormTitle] = useState<string>("");
+  const [promoFormBadge, setPromoFormBadge] = useState<string>("SPECIAL PROMO");
+  const [promoFormDesc, setPromoFormDesc] = useState<string>("");
+  const [promoFormDiscountCode, setPromoFormDiscountCode] = useState<string>("");
+  const [promoFormValidity, setPromoFormValidity] = useState<string>("Valid until Nov 30, 2026");
+  const [promoFormCtaText, setPromoFormCtaText] = useState<string>("Claim Promo Pass");
+  const [promoFormLocation, setPromoFormLocation] = useState<"both" | "banner" | "section">("both");
+  const [promoFormIsActive, setPromoFormIsActive] = useState<boolean>(true);
+  const [copiedPromoCodeId, setCopiedPromoCodeId] = useState<string | null>(null);
+
   // Load bookings from localStorage
   const refreshBookings = useCallback(() => {
     const list = getBookings();
     setBookings(list);
   }, []);
 
+  // Load promos from localStorage
+  const refreshPromos = useCallback(() => {
+    const list = getPromos();
+    setPromos(list);
+  }, []);
+
   useEffect(() => {
     refreshBookings();
+    refreshPromos();
 
-    const handleSync = () => {
+    const handleBookingsSync = () => refreshBookings();
+    const handlePromosSync = () => refreshPromos();
+
+    window.addEventListener("fnj-bookings-changed", handleBookingsSync);
+    window.addEventListener("fnj-promos-changed", handlePromosSync);
+    window.addEventListener("storage", () => {
       refreshBookings();
-    };
-
-    window.addEventListener("fnj-bookings-changed", handleSync);
-    window.addEventListener("storage", handleSync);
+      refreshPromos();
+    });
 
     return () => {
-      window.removeEventListener("fnj-bookings-changed", handleSync);
-      window.removeEventListener("storage", handleSync);
+      window.removeEventListener("fnj-bookings-changed", handleBookingsSync);
+      window.removeEventListener("fnj-promos-changed", handlePromosSync);
     };
-  }, [refreshBookings]);
+  }, [refreshBookings, refreshPromos]);
 
   // Generate Branded QR Code for inspected booking with FNJ Center Medallion, Date & Time
   useEffect(() => {
@@ -169,14 +205,20 @@ export default function AdminCrmDashboardPage() {
       (b) => b.addons.includes("Pickleball") || b.addons.includes("Conference")
     ).length;
 
+    const activePromosCount = promos.filter((p) => p.isActive).length;
+    const bannerPromosCount = promos.filter((p) => p.isActive && (p.displayLocation === "banner" || p.displayLocation === "both")).length;
+
     return {
       totalCount: bookings.length,
       totalToday,
       checkedInCount,
       totalRevenue,
       pickleballOrConf,
+      totalPromos: promos.length,
+      activePromosCount,
+      bannerPromosCount,
     };
-  }, [bookings, todayStr]);
+  }, [bookings, promos, todayStr]);
 
   // Status Change
   const handleStatusChange = (id: string, newStatus: BookingRecord["status"]) => {
@@ -332,6 +374,95 @@ export default function AdminCrmDashboardPage() {
     setWalkinPhone("");
   };
 
+  // --- PROMO MANAGEMENT HANDLERS ---
+  const handleOpenNewPromoModal = () => {
+    setEditingPromoId(null);
+    setPromoFormTitle("");
+    setPromoFormBadge("SPECIAL PROMO");
+    setPromoFormDesc("");
+    setPromoFormDiscountCode("");
+    setPromoFormValidity("Valid until Nov 30, 2026");
+    setPromoFormCtaText("Claim Promo Pass");
+    setPromoFormLocation("both");
+    setPromoFormIsActive(true);
+    setIsPromoModalOpen(true);
+  };
+
+  const handleEditPromo = (promo: PromoAnnouncement) => {
+    setEditingPromoId(promo.id);
+    setPromoFormTitle(promo.title);
+    setPromoFormBadge(promo.badge);
+    setPromoFormDesc(promo.description);
+    setPromoFormDiscountCode(promo.discountCode || "");
+    setPromoFormValidity(promo.validityText);
+    setPromoFormCtaText(promo.ctaText || "Claim Promo Pass");
+    setPromoFormLocation(promo.displayLocation);
+    setPromoFormIsActive(promo.isActive);
+    setIsPromoModalOpen(true);
+  };
+
+  const handleSavePromoForm = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!promoFormTitle.trim() || !promoFormDesc.trim()) return;
+
+    if (editingPromoId) {
+      updatePromo(editingPromoId, {
+        title: promoFormTitle.trim(),
+        badge: promoFormBadge.trim(),
+        description: promoFormDesc.trim(),
+        discountCode: promoFormDiscountCode.trim() || undefined,
+        validityText: promoFormValidity.trim(),
+        ctaText: promoFormCtaText.trim() || "Claim Promo Pass",
+        displayLocation: promoFormLocation,
+        isActive: promoFormIsActive,
+      });
+    } else {
+      const newPromo: PromoAnnouncement = {
+        id: "promo-" + Date.now(),
+        title: promoFormTitle.trim(),
+        badge: promoFormBadge.trim(),
+        description: promoFormDesc.trim(),
+        discountCode: promoFormDiscountCode.trim() || undefined,
+        validityText: promoFormValidity.trim(),
+        ctaText: promoFormCtaText.trim() || "Claim Promo Pass",
+        displayLocation: promoFormLocation,
+        isActive: promoFormIsActive,
+        createdAt: new Date().toISOString(),
+      };
+      savePromo(newPromo);
+    }
+
+    refreshPromos();
+    setIsPromoModalOpen(false);
+  };
+
+  const handleTogglePromo = (id: string) => {
+    togglePromoStatus(id);
+    refreshPromos();
+  };
+
+  const handleDeletePromo = (id: string) => {
+    if (confirm("Are you sure you want to remove this promo announcement?")) {
+      deletePromo(id);
+      refreshPromos();
+    }
+  };
+
+  const handleResetPromos = () => {
+    if (confirm("Reset promos to default realistic Albay promotions?")) {
+      resetToSeedPromos();
+      refreshPromos();
+    }
+  };
+
+  const handleCopyPromoCode = (id: string, code: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(code);
+      setCopiedPromoCodeId(id);
+      setTimeout(() => setCopiedPromoCodeId(null), 2000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F5F5DC] text-[#0A192F] font-sans flex flex-col w-full overflow-x-hidden">
       {/* 1. RESPONSIVE EXECUTIVE CRM HEADER */}
@@ -363,7 +494,7 @@ export default function AdminCrmDashboardPage() {
             </div>
 
             {/* Right / Actions Row */}
-            <div className="flex items-center gap-2 self-end sm:self-auto w-full sm:w-auto justify-end">
+            <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto justify-end">
               <Link
                 href="/"
                 className="min-h-[40px] px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold text-[#0A192F] hover:bg-stone-100 border border-stone-200/80 transition-colors flex items-center gap-1.5"
@@ -372,12 +503,22 @@ export default function AdminCrmDashboardPage() {
                 <span>Public Site</span>
               </Link>
 
+              {/* Add Promo Button (Accessible from any tab) */}
+              <button
+                onClick={handleOpenNewPromoModal}
+                className="min-h-[40px] px-3 sm:px-3.5 py-2 rounded-xl text-xs font-black bg-[#D4AF37] text-[#0A192F] hover:bg-[#b8952b] transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                title="Add a new live promo or announcement"
+              >
+                <Sparkles className="w-3.5 h-3.5 fill-[#0A192F]" />
+                <span>+ Add Promo</span>
+              </button>
+
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="min-h-[40px] px-3.5 sm:px-4 py-2 rounded-xl text-xs font-black bg-[#0A192F] text-white hover:bg-blue-900 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[40px] px-3 sm:px-3.5 py-2 rounded-xl text-xs font-black bg-[#0A192F] text-white hover:bg-blue-900 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span>Register Walk-In</span>
+                <span>Walk-In</span>
               </button>
             </div>
           </div>
@@ -387,172 +528,268 @@ export default function AdminCrmDashboardPage() {
       {/* 2. MAIN CRM DASHBOARD CONTENT */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8">
         {/* KPI METRICS ROW - 5-TIER RESPONSIVE GRID */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
-          {/* Card 1: Today's Bookings */}
-          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
-            <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
-              <span>Today&apos;s Bookings</span>
-              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
+        {activeViewTab !== "promos" ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
+            {/* Card 1: Today's Bookings */}
+            <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+              <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
+                <span>Today&apos;s Bookings</span>
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
+              </div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
+                {metrics.totalToday}
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" />
+                <span>{metrics.totalCount} total in system</span>
+              </div>
             </div>
-            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
-              {metrics.totalToday}
+
+            {/* Card 2: Currently Checked In */}
+            <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+              <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
+                <span>Currently Seated</span>
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" />
+              </div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-800">
+                {metrics.checkedInCount}
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-stone-500 font-medium truncate">
+                Checked-in at 2F desk
+              </div>
             </div>
-            <div className="text-[10px] sm:text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" />
-              <span>{metrics.totalCount} total in system</span>
+
+            {/* Card 3: Projected Revenue */}
+            <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+              <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
+                <span>Est. Revenue Value</span>
+                <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
+              </div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
+                ₱{metrics.totalRevenue.toLocaleString()}
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-[#D4AF37] font-bold truncate">
+                Albay best value rate tiers
+              </div>
+            </div>
+
+            {/* Card 4: Active Promos Badge */}
+            <div
+              onClick={() => setActiveViewTab("promos")}
+              className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2 cursor-pointer hover:border-[#D4AF37] transition-all group"
+            >
+              <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
+                <span>Live Website Promos</span>
+                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
+              </div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F] group-hover:text-blue-900">
+                {metrics.activePromosCount} Active
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-stone-500 font-medium truncate flex items-center justify-between">
+                <span>Manage bulletin & deals</span>
+                <span className="text-[#D4AF37] font-bold">View &rarr;</span>
+              </div>
             </div>
           </div>
+        ) : (
+          /* PROMOS & BULLETIN METRICS ROW */
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
+            <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+              <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
+                <span>Active Live on Website</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-800">
+                {metrics.activePromosCount}
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-stone-500 font-medium truncate">
+                Displayed on homepage & banner
+              </div>
+            </div>
 
-          {/* Card 2: Currently Checked In */}
-          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
-            <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
-              <span>Currently Seated</span>
-              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" />
+            <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+              <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
+                <span>Top Notice Tickers</span>
+                <Megaphone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
+              </div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
+                {metrics.bannerPromosCount}
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-stone-500 font-medium truncate">
+                Rotating top announcement bar
+              </div>
             </div>
-            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-800">
-              {metrics.checkedInCount}
+
+            <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+              <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
+                <span>Total Promos in CRM</span>
+                <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-900" />
+              </div>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
+                {promos.length}
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-stone-500 font-medium truncate">
+                Active & paused items
+              </div>
             </div>
-            <div className="text-[10px] sm:text-[11px] text-stone-500 font-medium truncate">
-              Checked-in at 2F desk
+
+            <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
+              <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
+                <span>Zero Database Needed</span>
+                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" />
+              </div>
+              <div className="text-sm sm:text-base font-black text-[#0A192F]">
+                Real-Time Local Sync
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-emerald-700 font-semibold truncate">
+                100% Client-side persistent
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Card 3: Projected Revenue */}
-          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
-            <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
-              <span>Est. Revenue Value</span>
-              <DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37]" />
-            </div>
-            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
-              ₱{metrics.totalRevenue.toLocaleString()}
-            </div>
-            <div className="text-[10px] sm:text-[11px] text-[#D4AF37] font-bold truncate">
-              Albay best value rate tiers
-            </div>
-          </div>
-
-          {/* Card 4: Specialized Spaces */}
-          <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white shadow-xs border border-stone-200/80 space-y-1 sm:space-y-2">
-            <div className="flex items-center justify-between text-stone-500 text-[11px] sm:text-xs font-bold">
-              <span>Boardroom & Pickleball</span>
-              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" />
-            </div>
-            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0A192F]">
-              {metrics.pickleballOrConf}
-            </div>
-            <div className="text-[10px] sm:text-[11px] text-stone-500 font-medium truncate">
-              Specialized bookings
-            </div>
-          </div>
-        </div>
-
-        {/* 3. CONTROLS, SEARCH, AND VIEW SWITCHER */}
+        {/* 3. CONTROLS & 3-WAY VIEW SWITCHER */}
         <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-stone-200/80 shadow-xs space-y-3 sm:space-y-4">
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
-            {/* Search Input */}
-            <div className="relative w-full md:max-w-md">
-              <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search guest, voucher, phone, email..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl sm:rounded-2xl border border-stone-200 text-xs sm:text-sm bg-stone-50/60 text-[#0A192F] focus:outline-none focus:bg-white focus:border-[#0A192F] transition-all"
-              />
+            {/* View Tabs Selector */}
+            <div className="p-1 bg-stone-100 rounded-xl sm:rounded-2xl flex flex-wrap items-center shrink-0 gap-1">
+              <button
+                onClick={() => setActiveViewTab("table")}
+                className={`min-h-[36px] px-3 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  activeViewTab === "table"
+                    ? "bg-[#0A192F] text-white shadow-xs"
+                    : "text-stone-600 hover:text-[#0A192F]"
+                }`}
+              >
+                Schedule View
+              </button>
+              <button
+                onClick={() => setActiveViewTab("timeline")}
+                className={`min-h-[36px] px-3 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  activeViewTab === "timeline"
+                    ? "bg-[#0A192F] text-white shadow-xs"
+                    : "text-stone-600 hover:text-[#0A192F]"
+                }`}
+              >
+                Daily Timeline
+              </button>
+              <button
+                onClick={() => setActiveViewTab("promos")}
+                className={`min-h-[36px] px-3 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeViewTab === "promos"
+                    ? "bg-[#0A192F] text-white shadow-xs"
+                    : "text-stone-600 hover:text-[#0A192F]"
+                }`}
+              >
+                <Sparkles className="w-3 h-3 text-[#D4AF37]" />
+                <span>Promos & Bulletin</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#D4AF37] text-[#0A192F] font-black">
+                  {metrics.activePromosCount}
+                </span>
+              </button>
             </div>
 
-            {/* View Tabs & Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Tab Selector */}
-              <div className="p-1 bg-stone-100 rounded-xl sm:rounded-2xl flex items-center shrink-0">
+            {/* Right Action Tools for Current Tab */}
+            {activeViewTab !== "promos" ? (
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Search Input */}
+                <div className="relative flex-1 sm:w-64">
+                  <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search bookings..."
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-200 text-xs bg-stone-50/60 text-[#0A192F] focus:outline-none focus:bg-white"
+                  />
+                </div>
+
+                {/* Export CSV */}
                 <button
-                  onClick={() => setActiveViewTab("table")}
-                  className={`min-h-[36px] px-3 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-black transition-all cursor-pointer ${
-                    activeViewTab === "table"
-                      ? "bg-[#0A192F] text-white shadow-xs"
-                      : "text-stone-600 hover:text-[#0A192F]"
-                  }`}
+                  onClick={handleExportCsv}
+                  className="min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-bold bg-stone-100 hover:bg-stone-200 text-[#0A192F] transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Export bookings to CSV"
                 >
-                  Schedule View
+                  <Download className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">Export CSV</span>
                 </button>
+
+                {/* Reset Seed Data */}
                 <button
-                  onClick={() => setActiveViewTab("timeline")}
-                  className={`min-h-[36px] px-3 sm:px-3.5 py-1.5 rounded-lg sm:rounded-xl text-xs font-black transition-all cursor-pointer ${
-                    activeViewTab === "timeline"
-                      ? "bg-[#0A192F] text-white shadow-xs"
-                      : "text-stone-600 hover:text-[#0A192F]"
-                  }`}
+                  onClick={handleResetData}
+                  className="min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Reset bookings database"
                 >
-                  Daily Timeline
+                  <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span className="hidden sm:inline">Reset Seeds</span>
                 </button>
               </div>
+            ) : (
+              /* Promo Actions */
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={handleOpenNewPromoModal}
+                  className="min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-black bg-[#0A192F] text-white hover:bg-blue-900 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>New Announcement</span>
+                </button>
 
-              {/* Export CSV */}
-              <button
-                onClick={handleExportCsv}
-                className="min-h-[38px] px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold bg-stone-100 hover:bg-stone-200 text-[#0A192F] transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
-                title="Export bookings to CSV"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">Export CSV</span>
-              </button>
-
-              {/* Reset Seed Data */}
-              <button
-                onClick={handleResetData}
-                className="min-h-[38px] px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
-                title="Reset mock database to realistic defaults"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
-                <span className="hidden sm:inline">Reset Seeds</span>
-              </button>
-            </div>
+                <button
+                  onClick={handleResetPromos}
+                  className="min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-bold bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Reset promos to default Albay seed promos"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Reset Promos</span>
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Quick Filter Chips (Fluid horizontal scrolling) */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin text-xs">
-            <span className="text-stone-400 font-bold text-[11px] uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
-              <Filter className="w-3 h-3" />
-              <span>Zone:</span>
-            </span>
+          {/* Quick Filter Chips for Bookings (Only visible in schedule or timeline tab) */}
+          {activeViewTab !== "promos" && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin text-xs">
+              <span className="text-stone-400 font-bold text-[11px] uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+                <Filter className="w-3 h-3" />
+                <span>Zone:</span>
+              </span>
 
-            {["All", "Silent Study", "Hot Desk", "Conference", "Pickleball"].map((zone) => (
+              {["All", "Silent Study", "Hot Desk", "Conference", "Pickleball"].map((zone) => (
+                <button
+                  key={zone}
+                  onClick={() => setSelectedZoneFilter(zone)}
+                  className={`min-h-[32px] px-3 py-1 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
+                    selectedZoneFilter === zone
+                      ? "bg-[#0A192F] text-white"
+                      : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                  }`}
+                >
+                  {zone}
+                </button>
+              ))}
+
+              <div className="h-4 w-px bg-stone-300 mx-1 shrink-0" />
+
               <button
-                key={zone}
-                onClick={() => setSelectedZoneFilter(zone)}
-                className={`min-h-[32px] px-3 py-1 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
-                  selectedZoneFilter === zone
-                    ? "bg-[#0A192F] text-white"
+                onClick={() => setSelectedDateFilter(selectedDateFilter === "today" ? "all" : "today")}
+                className={`min-h-[32px] px-3 py-1 rounded-xl font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                  selectedDateFilter === "today"
+                    ? "bg-[#D4AF37] text-[#0A192F]"
                     : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                 }`}
               >
-                {zone}
+                <Calendar className="w-3 h-3" />
+                <span>Today Only</span>
               </button>
-            ))}
-
-            <div className="h-4 w-px bg-stone-300 mx-1 shrink-0" />
-
-            {/* Date filter */}
-            <button
-              onClick={() => setSelectedDateFilter(selectedDateFilter === "today" ? "all" : "today")}
-              className={`min-h-[32px] px-3 py-1 rounded-xl font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
-                selectedDateFilter === "today"
-                  ? "bg-[#D4AF37] text-[#0A192F]"
-                  : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-              }`}
-            >
-              <Calendar className="w-3 h-3" />
-              <span>Today Only</span>
-            </button>
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* 4. VIEW RENDER: SCHEDULE VIEW OR TIMELINE VIEW */}
+        {/* 4. VIEW RENDER: SCHEDULE, TIMELINE, OR PROMOS MANAGER */}
         {activeViewTab === "table" ? (
           <div className="space-y-4">
-            {/* ======================================================== */}
             {/* 4A. MOBILE RESERVATION CARDS FEED (Screen < 768px: md:hidden) */}
-            {/* ======================================================== */}
             <div className="md:hidden space-y-3">
               {filteredBookings.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center text-stone-400 border border-stone-200/80">
@@ -568,7 +805,6 @@ export default function AdminCrmDashboardPage() {
                       key={b.id}
                       className="bg-white rounded-2xl p-4 border border-stone-200/80 shadow-xs space-y-3"
                     >
-                      {/* Card Top: Voucher Code + Status Selector */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5">
                           <span className="font-mono font-black text-xs text-[#0A192F] bg-stone-100 px-2 py-0.5 rounded">
@@ -582,7 +818,6 @@ export default function AdminCrmDashboardPage() {
                           )}
                         </div>
 
-                        {/* Status Select */}
                         <select
                           value={b.status}
                           onChange={(e) =>
@@ -605,7 +840,6 @@ export default function AdminCrmDashboardPage() {
                         </select>
                       </div>
 
-                      {/* Guest Details */}
                       <div>
                         <div
                           onClick={() => setInspectingBooking(b)}
@@ -621,7 +855,6 @@ export default function AdminCrmDashboardPage() {
                         </div>
                       </div>
 
-                      {/* Schedule Highlight Box */}
                       <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-100 text-xs space-y-1">
                         <div className="flex items-center justify-between font-bold text-[#0A192F]">
                           <span className="flex items-center gap-1.5">
@@ -644,7 +877,6 @@ export default function AdminCrmDashboardPage() {
                         </div>
                       </div>
 
-                      {/* Actions Footer */}
                       <div className="flex items-center gap-2 pt-1">
                         <button
                           onClick={() => setInspectingBooking(b)}
@@ -667,9 +899,7 @@ export default function AdminCrmDashboardPage() {
               )}
             </div>
 
-            {/* ======================================================== */}
             {/* 4B. DESKTOP / TABLET SCHEDULE TABLE (>= 768px: hidden md:block) */}
-            {/* ======================================================== */}
             <div className="hidden md:block bg-white rounded-3xl border border-stone-200/80 shadow-xs overflow-hidden">
               <div className="overflow-x-auto scrollbar-thin">
                 <table className="w-full text-left text-xs lg:text-sm min-w-[760px]">
@@ -704,7 +934,6 @@ export default function AdminCrmDashboardPage() {
                             key={b.id}
                             className="hover:bg-stone-50/80 transition-colors group"
                           >
-                            {/* 1. Voucher & Guest */}
                             <td className="py-4 px-4 lg:px-6">
                               <div className="space-y-0.5">
                                 <div className="flex items-center gap-2">
@@ -727,7 +956,6 @@ export default function AdminCrmDashboardPage() {
                               </div>
                             </td>
 
-                            {/* 2. Schedule Slot */}
                             <td className="py-4 px-4 lg:px-6">
                               <div className="space-y-1">
                                 <div className="flex items-center gap-1.5 font-bold text-xs">
@@ -746,7 +974,6 @@ export default function AdminCrmDashboardPage() {
                               </div>
                             </td>
 
-                            {/* 3. Zone & Duration */}
                             <td className="py-4 px-4 lg:px-6">
                               <div className="space-y-1">
                                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-stone-100 text-[#0A192F] inline-block">
@@ -764,7 +991,6 @@ export default function AdminCrmDashboardPage() {
                               </div>
                             </td>
 
-                            {/* 4. Rate & Fee */}
                             <td className="py-4 px-4 lg:px-6">
                               <div className="space-y-0.5">
                                 <div className="font-black text-sm text-[#0A192F]">
@@ -776,7 +1002,6 @@ export default function AdminCrmDashboardPage() {
                               </div>
                             </td>
 
-                            {/* 5. Status Badge & Quick Toggle */}
                             <td className="py-4 px-4 lg:px-6">
                               <select
                                 value={b.status}
@@ -800,10 +1025,8 @@ export default function AdminCrmDashboardPage() {
                               </select>
                             </td>
 
-                            {/* 6. Actions */}
                             <td className="py-4 px-4 lg:px-6 text-right">
                               <div className="flex items-center justify-end gap-2">
-                                {/* Inspect Branded Pass QR */}
                                 <button
                                   onClick={() => setInspectingBooking(b)}
                                   className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-[#0A192F] text-stone-700 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
@@ -812,7 +1035,6 @@ export default function AdminCrmDashboardPage() {
                                   <QrCode className="w-4 h-4" />
                                 </button>
 
-                                {/* Delete */}
                                 <button
                                   onClick={() => handleDelete(b.id)}
                                   className="w-8 h-8 rounded-lg bg-stone-100 hover:bg-red-50 text-stone-400 hover:text-red-600 flex items-center justify-center transition-colors cursor-pointer"
@@ -836,10 +1058,8 @@ export default function AdminCrmDashboardPage() {
               </div>
             </div>
           </div>
-        ) : (
-          /* ======================================================== */
-          /* TIMELINE VIEW: HOURLY PHASES & BOOKED SLOTS              */
-          /* ======================================================== */
+        ) : activeViewTab === "timeline" ? (
+          /* TIMELINE VIEW */
           <div className="space-y-4 sm:space-y-6">
             {["Morning (08:00 AM – 11:30 AM)", "Afternoon (12:00 PM – 04:30 PM)", "Evening (05:00 PM – 08:30 PM)"].map(
               (phaseTitle, idx) => {
@@ -931,10 +1151,155 @@ export default function AdminCrmDashboardPage() {
               }
             )}
           </div>
+        ) : (
+          /* ======================================================== */
+          /* 4C. PROMOS & ANNOUNCEMENTS BULLETIN MANAGER VIEW         */
+          /* ======================================================== */
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-3xl border border-stone-200/80 shadow-xs">
+              <div>
+                <h3 className="font-black text-base sm:text-lg text-[#0A192F] flex items-center gap-2">
+                  <Megaphone className="w-5 h-5 text-[#D4AF37]" />
+                  <span>Website Promos & Community Bulletin</span>
+                </h3>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Promos and notices created here automatically display on the public website homepage and top announcement bar in real time without any database.
+                </p>
+              </div>
+
+              <button
+                onClick={handleOpenNewPromoModal}
+                className="self-start sm:self-auto min-h-[42px] px-4 py-2 rounded-xl bg-[#0A192F] text-white hover:bg-blue-900 font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+              >
+                <Plus className="w-4 h-4 text-[#D4AF37]" />
+                <span>+ Create Promo Announcement</span>
+              </button>
+            </div>
+
+            {/* Promos Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {promos.length === 0 ? (
+                <div className="col-span-full bg-white rounded-3xl p-12 text-center text-stone-400 border border-stone-200/80 space-y-3">
+                  <Megaphone className="w-10 h-10 text-stone-300 mx-auto" />
+                  <h4 className="font-black text-base text-[#0A192F]">No Promos or Announcements Found</h4>
+                  <p className="text-xs max-w-md mx-auto text-stone-500">
+                    Add a discount voucher, student deal, or important facility announcement to display on the public site.
+                  </p>
+                  <button
+                    onClick={handleResetPromos}
+                    className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs"
+                  >
+                    Load Default Albay Seed Promos
+                  </button>
+                </div>
+              ) : (
+                promos.map((p) => (
+                  <div
+                    key={p.id}
+                    className={`bg-white rounded-3xl p-5 sm:p-6 border transition-all duration-200 flex flex-col justify-between space-y-4 shadow-xs ${
+                      p.isActive
+                        ? "border-stone-200 hover:border-[#D4AF37] hover:shadow-md"
+                        : "border-stone-200 opacity-60 bg-stone-50/50"
+                    }`}
+                  >
+                    {/* Top Row: Badge, Location & Status Toggle */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="px-2.5 py-1 rounded-full bg-[#D4AF37]/20 text-[#0A192F] text-[10px] font-black uppercase tracking-wider border border-[#D4AF37]/40 flex items-center gap-1">
+                          <Tag className="w-3 h-3 text-[#B8952B]" />
+                          <span>{p.badge}</span>
+                        </span>
+
+                        {/* Status Toggle Switch */}
+                        <button
+                          onClick={() => handleTogglePromo(p.id)}
+                          className={`min-h-[28px] px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-colors flex items-center gap-1.5 cursor-pointer ${
+                            p.isActive
+                              ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                              : "bg-stone-200 text-stone-600 hover:bg-stone-300"
+                          }`}
+                          title={p.isActive ? "Click to Pause" : "Click to Activate"}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${p.isActive ? "bg-emerald-600 animate-pulse" : "bg-stone-400"}`} />
+                          <span>{p.isActive ? "Live on Site" : "Paused"}</span>
+                        </button>
+                      </div>
+
+                      {/* Display Location Tag */}
+                      <div className="flex items-center gap-1.5 text-[11px] text-stone-500 font-medium">
+                        <Layers className="w-3 h-3 text-[#D4AF37]" />
+                        <span>
+                          Placement:{" "}
+                          <strong className="text-[#0A192F]">
+                            {p.displayLocation === "both"
+                              ? "Top Banner & Public Section"
+                              : p.displayLocation === "banner"
+                              ? "Top Announcement Bar Only"
+                              : "Public Section Only"}
+                          </strong>
+                        </span>
+                      </div>
+
+                      {/* Title & Description */}
+                      <div>
+                        <h4 className="font-black text-base text-[#0A192F] leading-snug">
+                          {p.title}
+                        </h4>
+                        <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
+                          {p.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Voucher Code & Action Footer */}
+                    <div className="space-y-3 pt-3 border-t border-stone-100">
+                      {p.discountCode && (
+                        <div className="flex items-center justify-between p-2 rounded-xl bg-stone-50 border border-stone-200 text-xs">
+                          <span className="font-mono font-bold text-[#0A192F] text-xs">
+                            {p.discountCode}
+                          </span>
+                          <button
+                            onClick={() => handleCopyPromoCode(p.id, p.discountCode!)}
+                            className="text-[10px] px-2 py-0.5 rounded bg-white hover:bg-stone-100 text-stone-700 font-bold border border-stone-200 cursor-pointer"
+                          >
+                            {copiedPromoCodeId === p.id ? "Copied!" : "Copy"}
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="text-[11px] text-stone-400 font-medium flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-stone-400" />
+                        <span>{p.validityText}</span>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={() => handleEditPromo(p)}
+                          className="flex-1 min-h-[36px] py-1.5 px-3 rounded-xl bg-stone-100 hover:bg-[#0A192F] hover:text-white text-[#0A192F] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDeletePromo(p.id)}
+                          className="min-h-[36px] w-9 rounded-xl bg-stone-100 hover:bg-red-50 text-stone-400 hover:text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                          title="Delete promo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         )}
       </main>
 
-      {/* 5. INSPECT BRANDED QR CODE MODAL - WITH EMBEDDED FNJ MONOGRAM, DATE & TIME */}
+      {/* 5. INSPECT BRANDED QR CODE MODAL */}
       {inspectingBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div
@@ -979,7 +1344,7 @@ export default function AdminCrmDashboardPage() {
               </div>
             </div>
 
-            {/* Branded Pass Display (Full Badge with Center Logo, Date, and Time) */}
+            {/* Branded Pass Display */}
             <div className="w-56 sm:w-64 max-w-full aspect-[460/620] mx-auto bg-white p-1 rounded-2xl border-2 border-[#D4AF37] shadow-lg flex items-center justify-center overflow-hidden">
               {inspectingQrDataUrl ? (
                 <img
@@ -1032,7 +1397,6 @@ export default function AdminCrmDashboardPage() {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-2 pt-1">
-              {/* Check-In / Status toggle */}
               <button
                 onClick={() => {
                   handleStatusChange(inspectingBooking.id, "Checked In");
@@ -1044,7 +1408,6 @@ export default function AdminCrmDashboardPage() {
                 <span>Mark Checked In</span>
               </button>
 
-              {/* Download Branded Pass */}
               <button
                 onClick={handleDownloadInspectedQr}
                 className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#0A192F] hover:bg-blue-900 text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
@@ -1065,7 +1428,7 @@ export default function AdminCrmDashboardPage() {
         </div>
       )}
 
-      {/* 6. REGISTER MANUAL WALK-IN DIALOG - 100% RESPONSIVE */}
+      {/* 6. REGISTER MANUAL WALK-IN DIALOG */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div
@@ -1211,6 +1574,209 @@ export default function AdminCrmDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 7. ADD / EDIT PROMO & ANNOUNCEMENT MODAL */}
+      {isPromoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div
+            onClick={() => setIsPromoModalOpen(false)}
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
+            aria-hidden="true"
+          />
+
+          <div className="relative bg-white rounded-3xl p-5 sm:p-7 max-w-lg w-full space-y-4 shadow-2xl z-10 max-h-[92dvh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200 my-auto">
+            <button
+              onClick={() => setIsPromoModalOpen(false)}
+              className="absolute top-4 right-4 w-9 h-9 min-w-[44px] min-h-[44px] rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Close dialog"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <span className="text-[10px] font-black uppercase text-[#0A192F] bg-[#D4AF37] px-3 py-1 rounded-full inline-block">
+                {editingPromoId ? "Edit Announcement" : "Publish New Promo"}
+              </span>
+              <h3 className="text-lg sm:text-xl font-black text-[#0A192F] mt-2">
+                {editingPromoId ? "Edit Promo Announcement" : "Create Promo Announcement"}
+              </h3>
+              <p className="text-xs text-stone-500">
+                Immediately updates the live public website and top notice ticker with zero database.
+              </p>
+            </div>
+
+            <form onSubmit={handleSavePromoForm} className="space-y-3.5">
+              {/* Promo Title */}
+              <div>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
+                  Announcement / Deal Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={promoFormTitle}
+                  onChange={(e) => setPromoFormTitle(e.target.value)}
+                  placeholder="e.g. Albay Student Midterms: 20% Off 5-Hour Pass"
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs sm:text-sm bg-white text-[#0A192F] focus:outline-none focus:border-[#0A192F]"
+                />
+              </div>
+
+              {/* Category / Badge */}
+              <div>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
+                  Category Tag / Badge
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {[
+                    "STUDENT PERK",
+                    "WEEKEND COMBO",
+                    "SPECIAL PROMO",
+                    "ANNOUNCEMENT",
+                    "FLASH SALE",
+                    "COMMUNITY",
+                  ].map((tag) => (
+                    <button
+                      type="button"
+                      key={tag}
+                      onClick={() => setPromoFormBadge(tag)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer ${
+                        promoFormBadge === tag
+                          ? "bg-[#0A192F] text-white"
+                          : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={promoFormBadge}
+                  onChange={(e) => setPromoFormBadge(e.target.value.toUpperCase())}
+                  placeholder="Or enter custom badge (e.g. MAYON VIEW)"
+                  className="w-full px-3.5 py-2 rounded-xl border border-stone-200 text-xs bg-white text-[#0A192F] focus:outline-none focus:border-[#0A192F]"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
+                  Full Details / Terms *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={promoFormDesc}
+                  onChange={(e) => setPromoFormDesc(e.target.value)}
+                  placeholder="Describe the offer, eligibility (e.g. Present student ID at 2F desk), or facility update."
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 text-xs bg-white text-[#0A192F] focus:outline-none focus:border-[#0A192F] resize-none"
+                />
+              </div>
+
+              {/* Discount Code & Validity */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
+                    Promo Code (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={promoFormDiscountCode}
+                    onChange={(e) => setPromoFormDiscountCode(e.target.value.toUpperCase())}
+                    placeholder="e.g. BU-MIDTERMS20"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-xs font-mono font-bold bg-white text-[#0A192F] focus:outline-none focus:border-[#0A192F]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
+                    Validity Duration
+                  </label>
+                  <input
+                    type="text"
+                    value={promoFormValidity}
+                    onChange={(e) => setPromoFormValidity(e.target.value)}
+                    placeholder="e.g. Valid until Nov 30, 2026"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-xs bg-white text-[#0A192F] focus:outline-none focus:border-[#0A192F]"
+                  />
+                </div>
+              </div>
+
+              {/* Button CTA text */}
+              <div>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
+                  CTA Action Button Label
+                </label>
+                <input
+                  type="text"
+                  value={promoFormCtaText}
+                  onChange={(e) => setPromoFormCtaText(e.target.value)}
+                  placeholder="e.g. Claim Student Pass"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-xs bg-white text-[#0A192F] focus:outline-none focus:border-[#0A192F]"
+                />
+              </div>
+
+              {/* Display Placement Selection */}
+              <div>
+                <label className="text-[11px] font-black uppercase tracking-wider text-[#0A192F] block mb-1">
+                  Display Location on Public Site
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: "both", label: "Banner & Section" },
+                    { id: "banner", label: "Top Banner Only" },
+                    { id: "section", label: "Section Only" },
+                  ].map((loc) => (
+                    <button
+                      type="button"
+                      key={loc.id}
+                      onClick={() => setPromoFormLocation(loc.id as any)}
+                      className={`p-2.5 rounded-xl text-center text-xs font-bold transition-all border cursor-pointer ${
+                        promoFormLocation === loc.id
+                          ? "bg-[#0A192F] text-white border-[#0A192F] shadow-xs"
+                          : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"
+                      }`}
+                    >
+                      {loc.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Active Switch */}
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="promoIsActiveCheck"
+                  checked={promoFormIsActive}
+                  onChange={(e) => setPromoFormIsActive(e.target.checked)}
+                  className="w-4 h-4 rounded text-[#0A192F] focus:ring-[#0A192F]"
+                />
+                <label htmlFor="promoIsActiveCheck" className="text-xs font-bold text-[#0A192F] cursor-pointer">
+                  Make Live on Public Website Immediately
+                </label>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                <button
+                  type="submit"
+                  className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-[#0A192F] text-white font-black text-xs uppercase tracking-wider hover:bg-blue-900 transition-colors cursor-pointer shadow-xs"
+                >
+                  {editingPromoId ? "Save Promo Changes" : "Publish Announcement"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPromoModalOpen(false)}
                   className="min-h-[44px] px-5 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs transition-colors cursor-pointer"
                 >
                   Cancel
